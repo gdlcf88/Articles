@@ -73,19 +73,17 @@ ABP vNext（后文简称Abp）是 Volo 公司堪称艺术品级的应用开发�
 ![HomePage](images/HomePage.png)
 
 1. 登录并使用通讯录（admin 用户的默认密码是 `1q2w3E*`）
-
 ![CreateContact](images/CreateContact.png)
-
-可以注意到，表单已被 abp-dynamic-form TagHelper 自动生成
-
 ![ContactList](images/ContactList.png)
 
-创建的联系人已经显示出来了。另外，你只需要简单的修改本地化文件，就能显示出中文词汇，这里我们不做演示
+你一定注意到了，表单已被 abp-dynamic-form TagHelper 自动生成。另外，你只需要简单的修改本地化文件，就能显示出中文词汇，这里我们不做演示。
 
 ## 后记
 
 我们的通讯录项目天然包含：用户权限角色管理、多租户 SaaS 支持，如果你打算系统的学习 Abp 框架，请阅读官方手册：https://docs.abp.io
 
 文中使用的 AbpHelper 是由国内爱好者创建的 EasyAbp 开源组织制作的开发工具集，能明显提高你的开发效率，并且完全免费。此外，EasyAbp 还提供了很多实用的模块，了解更多：https://github.com/EasyAbp/EasyAbpGuide
+
+## 下一节
 
 在下一节中，笔者将会介绍，如何给通讯录安装私信模块。此模块由 EasyAbp 组织开发并持续维护，你甚至可以在商业项目中免费使用它。
