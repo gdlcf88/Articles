@@ -14,7 +14,7 @@ ABP vNext（后文简称Abp）是 Volo 公司堪称艺术品级的应用开发�
 
 1. 命令行安装 ABP CLI：`dotnet tool install -g Volo.Abp.Cli`
 
-1. 命令行生成通讯录 App 项目：`abp new AddressBook`（将在当前目录中生成项目）
+2. 命令行生成通讯录 App 项目：`abp new AddressBook`（将在当前目录中生成项目）
 
 ### 第二步：创建“联系人”实体
 
@@ -22,7 +22,7 @@ ABP vNext（后文简称Abp）是 Volo 公司堪称艺术品级的应用开发�
 
 1. 新建 aspnet-core/src/AddressBook.Domain/Contacts 目录
 
-1. 在目录下手动创建 Contact.cs 文件
+2. 在目录下手动创建 Contact.cs 文件
 
 ```
     public class Contact : AggregateRoot<Guid>
@@ -56,13 +56,13 @@ ABP vNext（后文简称Abp）是 Volo 公司堪称艺术品级的应用开发�
     }
 ```
 
-1. 运行 Address.DbMigrator 项目，这是为了给数据库建立基础结构和数据
+3. 运行 Address.DbMigrator 项目，这是为了给数据库建立基础结构和数据
 
 ### 第三步：使用 AbpHelper 生成剩余代码
 
 1. 下载 AbpHelper GUI：https://github.com/EasyAbp/AbpHelper.GUI/releases
 
-1. 使用 Code Generator 功能，一键生成与 Contact 相关的全套代码：
+2. 使用 Code Generator 功能，一键生成与 Contact 相关的全套代码：
 ![EntityCodeGenerator](images/EntityCodeGenerator.png)
 
 > 如果你更习惯命令行操作，可以使用 AbpHelper CLI：https://github.com/EasyAbp/AbpHelper.CLI
@@ -72,7 +72,7 @@ ABP vNext（后文简称Abp）是 Volo 公司堪称艺术品级的应用开发�
 1. 启动 AddressBook.Web 项目
 ![HomePage](images/HomePage.png)
 
-1. 登录并使用通讯录（admin 用户的默认密码是 `1q2w3E*`）
+2. 登录并使用通讯录（admin 用户的默认密码是 `1q2w3E*`）
 ![CreateContact](images/CreateContact.png)
 ![ContactList](images/ContactList.png)
 
