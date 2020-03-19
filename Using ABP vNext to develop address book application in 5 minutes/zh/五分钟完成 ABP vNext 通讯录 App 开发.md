@@ -65,7 +65,9 @@ ABP vNext（后文简称Abp）是 Volo 公司堪称艺术品级的应用开发�
 2. 使用 Code Generator 功能，一键生成与 Contact 相关的全套代码：
 ![EntityCodeGenerator](images/EntityCodeGenerator.png)
 
-> 如果你更习惯命令行操作，可以使用 AbpHelper CLI：https://github.com/EasyAbp/AbpHelper.CLI
+> 如果你是第一次使用，请通过左侧的 Install or update AbpHelper CLI module 安装 CLI 工具
+
+> 如果你更习惯命令行操作，可以直接使用 AbpHelper CLI：https://github.com/EasyAbp/AbpHelper.CLI
 
 ### 第四步：开发完毕
 
@@ -75,8 +77,9 @@ ABP vNext（后文简称Abp）是 Volo 公司堪称艺术品级的应用开发�
 2. 登录并使用通讯录（admin 用户的默认密码是 `1q2w3E*`）
 ![CreateContact](images/CreateContact.png)
 ![ContactList](images/ContactList.png)
-
 你一定注意到了，表单已被 abp-dynamic-form TagHelper 自动生成。另外，你只需要简单的修改本地化文件，就能显示出中文词汇，这里我们不做演示。
+
+3. Contact 的 RESTful API 也已经自动生成，如果需要它们，访问路由 /swagger
 
 ## 后记
 
