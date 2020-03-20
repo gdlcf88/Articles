@@ -76,6 +76,8 @@ Abp vNext 框架支持应用对模块代码的重写，在 AddressBook.Applicati
 效果展示
 ![SendToSelf](images/SendToSelf.png)
 
+> 基于 Abp 的高可扩展性，甚至 JS 和 CSS 等静态文件也能够被重写，请阅读官方文档以了解更多用法：[Customizing the Existing Modules](https://docs.abp.io/en/abp/latest/Customizing-Application-Modules-Guide)
+
 ## 后记
 
 等到不久的将来 Abp 官方模块商城 market.abp.io 上线，文中手动安装模块的方式将成为历史，你只需要按一个键，模块就自动安装好了。在此之前，AbpHelper 可能会先开发一个简易的模块安装器，如果你有需要，请关注我们的进展：https://github.com/EasyAbp/EasyAbpGuide
