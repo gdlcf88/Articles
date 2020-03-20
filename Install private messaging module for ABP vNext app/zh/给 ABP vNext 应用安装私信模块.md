@@ -52,7 +52,8 @@ Abp vNext 框架支持应用对模块代码的重写，在 AddressBook.Applicati
     {
         public MyPrivateMessageAppService(IDataFilter dataFilter,
             IExternalUserLookupServiceProvider externalUserLookupServiceProvider,
-            IPrivateMessageRepository privateMessageRepository, IPrivateMessageNotificationManager notificationManager,
+            IPrivateMessageRepository privateMessageRepository,
+            IPrivateMessageNotificationManager notificationManager,
             IPrivateMessageSenderSideManager privateMessageSenderSideManager,
             IPrivateMessageReceiverSideManager privateMessageReceiverSideManager) : base(dataFilter,
             externalUserLookupServiceProvider, privateMessageRepository, notificationManager,
