@@ -47,6 +47,7 @@
 
 Abp vNext 框架支持应用对模块代码的重写，在 AddressBook.Application 项目中新建 MyPrivateMessageAppService.cs
 ```
+    [Dependency(ReplaceServices = true)]
     public class MyPrivateMessageAppService : PrivateMessageAppService
     {
         public MyPrivateMessageAppService(IDataFilter dataFilter,
