@@ -1,6 +1,6 @@
 # 给 ABP vNext 应用安装私信模块
 
-在[上一节](../../Using ABP vNext to develop address book application in 5 minutes/zh/五分钟完成 ABP vNext 通讯录 App 开发.md)中，我们用完成了通讯录 App 的基础开发。
+在[上一节](../../Using%20ABP%20vNext%20to%20develop%20address%20book%20application%20in%205%20minutes/zh/五分钟完成%20ABP%20vNext%20通讯录%20App%20开发.md)中，我们用完成了通讯录 App 的基础开发。
 
 这本章节，我们会给通讯录 App 安装私信模块，使不同用户能够通过相互发送消息，并接收新私信的通知。在章节的最后，笔者将演示模块的“改装”，实现禁止用户发私信给自己的定制化需求。
 
