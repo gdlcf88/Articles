@@ -41,7 +41,7 @@
 启动 AddressBook.Web 项目，可以看到私信模块已经安装成功了。
 ![HomePage](images/HomePage.png)
 
-进一步了解 EasyAbp 私信模块：https://github.com/EasyAbp/PrivateMessaging
+> 进一步了解 EasyAbp 私信模块：https://github.com/EasyAbp/PrivateMessaging
 
 ## 改进模块：禁止用户发私信给自己
 
