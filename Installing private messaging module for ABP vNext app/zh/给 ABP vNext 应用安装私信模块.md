@@ -28,10 +28,10 @@
 
 1. 分别在以上项目的 Module 类中添加私信模块的依赖，例如：在 AddressBook.Application 项目的 AddressBookApplicationModule.cs 中添加特性 `[DependsOn(PrivateMessagingApplicationModule)]`，以此类推。
 
-1. 在 AddressBook.Web 项目的 AddressBookWebModule.cs 中找到 `Configure<AbpAspNetCoreMvcOptions>(options => { ... });`，在里面加一行配置 `options.ConventionalControllers.Create(typeof(PrivateMessagingApplicationModule).Assembly);`，这一步是为了私信模块 WebAPI 的自动生成。
+2. 在 AddressBook.Web 项目的 AddressBookWebModule.cs 中找到 `Configure<AbpAspNetCoreMvcOptions>(options => { ... });`，在里面加一行配置 `options.ConventionalControllers.Create(typeof(PrivateMessagingApplicationModule).Assembly);`，这一步是为了私信模块 WebAPI 的自动生成。
 > 如果 AddressBook.Web 项目不在你的解决方案中，则你需要用 AddressBook.HttpApi.Host 代替它。
 
-1. 在 AddressBook.EntityFrameworkCore.DbMigrations 项目的 AddressBookMigrationsDbContext.cs 中找到 OnModelCreating 方法，在里面加一行 `builder.ConfigurePrivateMessaging();`，使私信模块的 EF Core 迁移能够进行。
+3. 在 AddressBook.EntityFrameworkCore.DbMigrations 项目的 AddressBookMigrationsDbContext.cs 中找到 OnModelCreating 方法，在里面加一行 `builder.ConfigurePrivateMessaging();`，使私信模块的 EF Core 迁移能够进行。
 
 ### 第三步：创建 EF Core 迁移并更新数据库
 
