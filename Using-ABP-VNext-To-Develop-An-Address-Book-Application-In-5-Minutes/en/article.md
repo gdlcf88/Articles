@@ -1,6 +1,6 @@
 # Using ABP vNext to Develop an Address Book Application in 5 Minutes
 
-ABP vNext framework (hereinafter called the "ABP") is an artwork-level application development framework designed by Volosoft. It is based on Domain-Driven-Design (DDD) and innovatively adopts modular development design. ABP is undoubtedly the most advanced and elegant existence in ASP.NET Core development frameworks.
+ABP vNext framework (hereinafter called "ABP") is an artwork-level application development framework designed by Volosoft. It is based on Domain-Driven-Design (DDD) and innovatively adopts modular development design. ABP is undoubtedly the most advanced and elegant existence in ASP.NET Core development frameworks.
 
 I believe that with the excellent modular development design and smooth development experience, ABP's position in ASP.NET Core is expected to reach the position of Spring in Java.
 
