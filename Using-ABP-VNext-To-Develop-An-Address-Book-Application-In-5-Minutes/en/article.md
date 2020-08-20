@@ -28,7 +28,7 @@ For ABP, the contact entity should be an AggregateRoot. For details, please refe
 
 2. Manually create the `Contact.cs` file in the above directory.
 
-    ```
+    ```csharp
     public class Contact : AggregateRoot<Guid>
     {
         public virtual string Name { get; protected set; }

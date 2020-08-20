@@ -28,7 +28,7 @@ ABP vNext（后文简称Abp）是土耳其 Volosoft 公司艺术品级的应用�
 
 2. 在目录下手动创建 `Contact.cs` 文件
 
-    ```
+    ```csharp
     public class Contact : AggregateRoot<Guid>
     {
         public virtual string Name { get; protected set; }
