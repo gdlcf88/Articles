@@ -67,9 +67,7 @@ ABP vNext（后文简称Abp）是土耳其 Volosoft 公司艺术品级的应用�
 2. 使用 **CRUD Code Generator** 功能，一键生成与 Contact 相关的全部代码
 ![CrudCodeGenerator](images/CrudCodeGenerator.png)
 
-> 如果你是第一次使用，请通过左侧的 `Install or update AbpHelper CLI` 安装 AbpHelper CLI
-
-> 如果你更习惯命令行操作，可以直接使用 AbpHelper CLI：https://github.com/EasyAbp/AbpHelper.CLI
+> 如果你是第一次使用 AbpHelper GUI，请通过左侧导航菜单的 `Install or update AbpHelper CLI` 安装 AbpHelper CLI。如果你更习惯命令行操作，可以直接使用 [AbpHelper CLI](https://github.com/EasyAbp/AbpHelper.CLI) 完成前面的工作。
 
 ### 第四步：启动应用
 

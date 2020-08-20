@@ -67,9 +67,7 @@ For ABP, the contact entity should be an AggregateRoot. For details, please refe
 2. Use the **CRUD Code Generator** to generate all codes related to the Contact entity.
 ![CrudCodeGenerator](images/CrudCodeGenerator.png)
 
-> If you are using it for the first time, please install the AbpHelper CLI through the `Install or update AbpHelper CLI` on the left
-
-> You can also directly use [AbpHelper CLI](https://easyabp.io/abphelper/AbpHelper.CLI) to complete the above work.
+> If you are using the AbpHelper GUI for the first time, please install the AbpHelper CLI through the `Install or update AbpHelper CLI` on the left navigation menu. You can also directly use [AbpHelper CLI](https://easyabp.io/abphelper/AbpHelper.CLI) to complete the above work.
 
 ### Step 4: Run the Application
 
