@@ -41,22 +41,7 @@ ABP vNext（后文简称Abp）是土耳其 Volosoft 公司艺术品级的应用�
         
         public virtual DateTime? Birthday { get; protected set; }
         
-        protected Contact() { }
-
-        public Contact(
-            Guid id,
-            string name,
-            string phoneNumber,
-            string address,
-            byte? age,
-            DateTime? birthday) : base(id)
-        {
-            Name = name;
-            PhoneNumber = phoneNumber;
-            Address = address;
-            Age = age;
-            Birthday = birthday;
-        }
+        // 构造函数将会稍后被自动生成，不需要在此处手动添加
     }
     ```
 

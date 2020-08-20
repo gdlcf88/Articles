@@ -40,23 +40,8 @@ For ABP, the contact entity should be an AggregateRoot. For details, please refe
         public virtual byte? Age { get; protected set; }
         
         public virtual DateTime? Birthday { get; protected set; }
-        
-        protected Contact() { }
 
-        public Contact(
-            Guid id,
-            string name,
-            string phoneNumber,
-            string address,
-            byte? age,
-            DateTime? birthday) : base(id)
-        {
-            Name = name;
-            PhoneNumber = phoneNumber;
-            Address = address;
-            Age = age;
-            Birthday = birthday;
-        }
+        // The constructors will be generated later, you don’t need to add them manually here.
     }
     ```
 
