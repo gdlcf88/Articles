@@ -85,7 +85,7 @@ ABP vNext（后文简称Abp）是土耳其 Volosoft 公司艺术品级的应用�
     ![CreateContact](images/CreateContact.png)
     ![ContactList](images/ContactList.png)
 
-你一定注意到了，表单已被 [abp-dynamic-form](https://docs.abp.io/en/abp/latest/UI/AspNetCore/Tag-Helpers/Dynamic-Forms) tag helper 自动生成。并且，你只需要简单的修改本地化 JSON 文件，就能显示出中文词汇，这里我们不做演示。
+    你一定注意到了，表单已被 [abp-dynamic-form](https://docs.abp.io/en/abp/latest/UI/AspNetCore/Tag-Helpers/Dynamic-Forms) tag helper 自动生成。并且，你只需要简单的修改本地化 JSON 文件，就能显示出中文词汇，这里我们不做演示。
 
 3. Contact 的 RESTful API 也已经自动生成，如果需要它们，访问路由 `/swagger`
 
