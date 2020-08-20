@@ -71,7 +71,7 @@ ABP vNext（后文简称Abp）是土耳其 Volosoft 公司艺术品级的应用�
 
 > 如果你更习惯命令行操作，可以直接使用 AbpHelper CLI：https://github.com/EasyAbp/AbpHelper.CLI
 
-### 第四步：开发完毕
+### 第四步：启动应用
 
 1. 启动 AddressBook.Web 项目
 ![HomePage](images/HomePage.png)
