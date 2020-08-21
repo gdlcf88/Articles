@@ -49,7 +49,7 @@ ABP vNext（后文简称Abp）是土耳其 Volosoft 公司艺术品级的应用�
 
 ### 第三步：使用代码生成器生成剩余代码
 
-> 本文使用的是 EasyAbp 开源的 [AbpHelper GUI](https://easyabp.io/abphelper/AbpHelper.GUI) 生成代码，如果你是 ABP 商业版用户，你还可以选择 [ABP Suite](https://commercial.abp.io/tools/suite)
+本文使用的是 EasyAbp 开源的 [AbpHelper GUI](https://easyabp.io/abphelper/AbpHelper.GUI) 生成代码，如果你是 ABP 商业版用户，你还可以选择 [ABP Suite](https://commercial.abp.io/tools/suite)
 
 1. 下载 AbpHelper GUI：https://github.com/EasyAbp/AbpHelper.GUI/releases
 
@@ -57,7 +57,7 @@ ABP vNext（后文简称Abp）是土耳其 Volosoft 公司艺术品级的应用�
 
     ![CrudCodeGenerator](images/CrudCodeGenerator.png)
 
-> 如果你是第一次使用 AbpHelper GUI，请通过左侧导航菜单的 `Install or update AbpHelper CLI` 安装 AbpHelper CLI。如果你更习惯命令行操作，可以直接使用 [AbpHelper CLI](https://github.com/EasyAbp/AbpHelper.CLI) 完成前面的工作。
+如果你是第一次使用 AbpHelper GUI，请通过左侧导航菜单的 `Install or update AbpHelper CLI` 安装 AbpHelper CLI。如果你更习惯命令行操作，可以直接使用 [AbpHelper CLI](https://github.com/EasyAbp/AbpHelper.CLI) 完成前面的工作。
 
 ### 第四步：启动应用
 
