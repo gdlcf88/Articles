@@ -1,6 +1,6 @@
 # Using ABP vNext to Develop an Address Book Application in 5 Minutes
 
-ABP vNext framework (hereinafter called the "ABP") is an artwork-level application development framework designed by Volosoft. It is based on Domain-Driven-Design (DDD) and innovatively adopts modular development design. ABP is undoubtedly the most advanced and elegant existence in ASP.NET Core development frameworks.
+ABP vNext framework (hereinafter called "ABP") is an artwork-level application development framework designed by Volosoft. It is based on Domain-Driven-Design (DDD) and innovatively adopts modular development design. ABP is undoubtedly the most advanced and elegant existence in ASP.NET Core development frameworks.
 
 I believe that with the excellent modular development design and smooth development experience, ABP's position in ASP.NET Core is expected to reach the position of Spring in Java.
 
@@ -49,7 +49,7 @@ For ABP, the contact entity should be an AggregateRoot. For details, please refe
 
 ### Step 3: Generate the Remaining Code
 
-> This article uses EasyAbp's open-source [AbpHelper GUI](https://easyabp.io/abphelper/AbpHelper.GUI) to generate code. If you are an ABP commercial user, you can also choose [ABP Suite](https://commercial.abp.io/tools/suite).
+This article uses EasyAbp's open-source [AbpHelper GUI](https://easyabp.io/abphelper/AbpHelper.GUI) to generate code. If you are an ABP commercial user, you can also choose [ABP Suite](https://commercial.abp.io/tools/suite).
 
 1. Download AbpHelper GUI: https://github.com/EasyAbp/AbpHelper.GUI/releases
 
@@ -57,7 +57,7 @@ For ABP, the contact entity should be an AggregateRoot. For details, please refe
 
     ![CrudCodeGenerator](images/CrudCodeGenerator.png)
 
-> If you are using the AbpHelper GUI for the first time, please install the AbpHelper CLI through the `Install or update AbpHelper CLI` on the left navigation menu. You can also directly use [AbpHelper CLI](https://easyabp.io/abphelper/AbpHelper.CLI) to complete the above work.
+If you are using the AbpHelper GUI for the first time, please install the AbpHelper CLI through the `Install or update AbpHelper CLI` on the left navigation menu. You can also directly use [AbpHelper CLI](https://easyabp.io/abphelper/AbpHelper.CLI) to complete the above work.
 
 ### Step 4: Run the Application
 
