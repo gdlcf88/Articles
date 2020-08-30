@@ -46,11 +46,13 @@
 ### 第四步：启动应用
 
 启动 AddressBook.Web 项目，我们可以看到私信模块已经安装成功了。
+
 ![HomePage](images/HomePage.png)
 
 ## 改进模块：禁止用户发私信给自己
 
 Abp 允许我们重写模块的代码，请在 AddressBook.Application 项目中新建文件 `MyPrivateMessageAppService.cs`：
+
 ```csharp
 [Dependency(ReplaceServices = true)]
 public class MyPrivateMessageAppService : PrivateMessageAppService
@@ -70,6 +72,7 @@ public class MyPrivateMessageAppService : PrivateMessageAppService
 ```
 
 此时如果用户发送邮件给自己，会看到错误提示信息：
+
 ![SendToSelf](images/SendToSelf.png)
 
 得益于 Abp 框架高可扩展性的模块化设计，JS 和 CSS 等静态文件以及页面均可被重写，请阅读官方文档以了解更多用法：[Customizing the Existing Modules](https://docs.abp.io/en/abp/latest/Customizing-Application-Modules-Guide)

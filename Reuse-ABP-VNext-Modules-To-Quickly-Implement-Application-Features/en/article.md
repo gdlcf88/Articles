@@ -46,6 +46,7 @@ If you want to learn more about this step, you can read the [ABP official docume
 ### Step 4: Run the Application
 
 Now run the AddressBook.Web project, we can see that the private messaging module has been installed successfully.
+
 ![HomePage](images/HomePage.png)
 
 ## Improved Module: Prohibit Users From Sending Private Messages to Themselves
@@ -70,6 +71,7 @@ public class MyPrivateMessageAppService: PrivateMessageAppService
 ```
 
 If a user sends a message to himself, he will see the error message:
+
 ![SendToSelf](images/SendToSelf.png)
 
 Thanks to the extensible modular design of the ABP framework, static files (such as JS and CSS files) and pages can be overridden. Please read the ABP official document for more information: [Customizing the Existing Modules](https://docs.abp.io/en/abp/latest/Customizing-Application-Modules-Guide)
