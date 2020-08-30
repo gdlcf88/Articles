@@ -81,7 +81,7 @@ public class MyPrivateMessageAppService : PrivateMessageAppService
 
 如果你希望进一步了解 PrivateMessaging 模块，请阅读它的[文档](https://easyabp.io/modules/PrivateMessaging)。
 
-顺便一提，EasyAbp 组织还有更多强大又实用的模块，例如：EShop、PaymentService、GiftCardManagement，它们可以真正提升你的开发效率，并且加强应用程序的可靠性。
+顺便一提，EasyAbp 组织还有更多强大又实用的模块，例如：EShop、PaymentService、GiftCardManagement，它们可以真正提升你的开发效率，并且加强应用程序的可靠性。如果你感兴趣，请阅读 [EasyAbp Guide](https://github.com/EasyAbp/EasyAbpGuide) 了解更多。
 
 笔者也期待将来 Abp 官方模块商城 market.abp.io 正式上线，提供社区模块的展示、检索和自动安装功能，从而使得我们安装模块更加容易。
 

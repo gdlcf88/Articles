@@ -80,7 +80,7 @@ Thanks to the extensible modular design of the ABP framework, static files (such
 
 If you want to learn more about the private messaging module, please read its [documentation](https://easyabp.io/modules/PrivateMessaging).
 
-By the way, the EasyAbp organization has many powerful and useful modules, such as EShop, PaymentService, GiftCardManagement, which can improve your development efficiency and enhance the reliability of applications.
+By the way, the EasyAbp organization has many powerful and useful modules, such as EShop, PaymentService, GiftCardManagement, which can improve your development efficiency and enhance the reliability of applications. If you are interested, please read [EasyAbp Guide](https://github.com/EasyAbp/EasyAbpGuide) to learn more.
 
 I look forward to the launch of ABP's official module market (market.abp.io) in the future, providing community modules list, search, and automatic installation features, making it easier for us to install modules.
 
