@@ -2,7 +2,9 @@
 
 在[上一篇](../../Using-ABP-VNext-To-Develop-An-Address-Book-Application-In-5-Minutes/zh/article.md)中，我们用完成了通讯录 App 的基本功能开发。
 
-本篇，我们会给通讯录 App 安装私信模块，使用户能够相互发送私信，并接收新私信的通知。在私信模块的设计里，用户可以发送私信给自己，但在本篇的最后，我们还要“改装”私信模块，从而禁止用户发送私信给自己。
+本篇，我们会给通讯录 App 安装私信模块，使用户能够相互发送私信，并接收新私信的通知。
+
+在私信模块的设计里，用户可以发送私信给自己，但在本篇的最后，我们还要“改装”私信模块，从而禁止用户发送私信给自己。
 
 ## 什么是“模块”？
 
@@ -27,7 +29,7 @@
 7. 将 NuGet 包 `EasyAbp.PrivateMessaging.HttpApi.Client`，安装到 `AddressBook.HttpApi.Client` 项目
 8. 将 NuGet 包 `EasyAbp.PrivateMessaging.Web`，安装到 `AddressBook.Web` 项目（如果你不需要 UI，可以跳过这一步）
 
-### 第二步：添加配置
+### 第二步：添加模块依赖和配置
 
 1. 分别在以上项目的 Module 类中添加私信模块的依赖，例如：在 AddressBook.Application 项目的 AddressBookApplicationModule.cs 中给类添加特性 `[DependsOn(PrivateMessagingApplicationModule)]`，以此类推
 
@@ -39,16 +41,16 @@
 
 2. 运行 AddressBook.DbMigrator 项目，它将自动完成数据库的更新
 
-如果你感兴趣，不妨阅读 [Abp 官方文档](https://docs.abp.io/en/abp/latest/Tutorials/Part-1#add-database-migration)了解更多。
+如果你想对这一步骤了解更多，请阅读 [Abp 官方文档](https://docs.abp.io/en/abp/latest/Tutorials/Part-1#add-database-migration)。
 
-### 第四步：安装完毕
+### 第四步：启动应用
 
 启动 AddressBook.Web 项目，我们可以看到私信模块已经安装成功了。
 ![HomePage](images/HomePage.png)
 
 ## 改进模块：禁止用户发私信给自己
 
-Abp vNext 框架支持对模块代码的重写，我们在 AddressBook.Application 项目中新建 `MyPrivateMessageAppService.cs`：
+Abp 允许我们重写模块的代码，请在 AddressBook.Application 项目中新建文件 `MyPrivateMessageAppService.cs`：
 ```csharp
 [Dependency(ReplaceServices = true)]
 public class MyPrivateMessageAppService : PrivateMessageAppService
@@ -74,9 +76,11 @@ public class MyPrivateMessageAppService : PrivateMessageAppService
 
 ## 后记
 
-如果你希望进一步了解 PrivateMessaging 模块，请阅读[它的文档](https://easyabp.io/modules/PrivateMessaging)。当然，EasyAbp 组织还有更多强大又实用的模块，例如：EShop、PaymentService、GiftCard，它们可以真正提升你的开发效率，并且加强应用程序的可靠性。
+如果你希望进一步了解 PrivateMessaging 模块，请阅读它的[文档](https://easyabp.io/modules/PrivateMessaging)。
 
-笔者也期待将来 Abp 官方模块商城 market.abp.io 正式发布，提供社区模块的展示、检索和自动安装功能，从而使得我们安装模块更加容易。
+顺便一提，EasyAbp 组织还有更多强大又实用的模块，例如：EShop、PaymentService、GiftCardManagement，它们可以真正提升你的开发效率，并且加强应用程序的可靠性。
+
+笔者也期待将来 Abp 官方模块商城 market.abp.io 正式上线，提供社区模块的展示、检索和自动安装功能，从而使得我们安装模块更加容易。
 
 ## 下一篇
 
