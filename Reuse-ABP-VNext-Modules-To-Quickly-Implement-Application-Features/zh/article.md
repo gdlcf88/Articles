@@ -37,7 +37,7 @@
 
 1. 在 AddressBook.EntityFrameworkCore.DbMigrations 项目目录中打开命令行，执行命令 `dotnet ef migrations add Installed_Pm_Module -s ../AddressBook.DbMigrator`
 
-2. 运行 AddressBook.DbMigrator 项目，完成数据库的更新操作
+2. 运行 AddressBook.DbMigrator 项目，它将自动完成数据库的更新
 
 如果你感兴趣，不妨阅读 [Abp 官方文档](https://docs.abp.io/en/abp/latest/Tutorials/Part-1#add-database-migration)了解更多。
 
@@ -49,7 +49,7 @@
 ## 改进模块：禁止用户发私信给自己
 
 Abp vNext 框架支持对模块代码的重写，我们在 AddressBook.Application 项目中新建 `MyPrivateMessageAppService.cs`：
-```
+```csharp
 [Dependency(ReplaceServices = true)]
 public class MyPrivateMessageAppService : PrivateMessageAppService
 {
