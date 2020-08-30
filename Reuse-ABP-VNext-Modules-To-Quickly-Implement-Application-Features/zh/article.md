@@ -78,6 +78,6 @@ public class MyPrivateMessageAppService : PrivateMessageAppService
 
 笔者也期待将来 Abp 官方模块商城 market.abp.io 正式发布，提供社区模块的展示、检索和自动安装功能，从而使得我们安装模块更加容易。
 
-## 下一节
+## 下一篇
 
-在下一节中，笔者将会介绍，如何通过一个简单的改动，让我们的通讯录 App 升级为多租户 SaaS 应用。
+下一篇，我们将通过一个简单的改动，让我们的通讯录 App 升级为多租户 SaaS 应用。
