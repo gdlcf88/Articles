@@ -54,7 +54,7 @@ Now run the AddressBook.Web project, we can see that the private messaging modul
 The ABP framework allows us to override the code in the module. Please create a new file `MyPrivateMessageAppService.cs` in the AddressBook.Application project:
 ```csharp
 [Dependency(ReplaceServices = true)]
-public class MyPrivateMessageAppService: PrivateMessageAppService
+public class MyPrivateMessageAppService : PrivateMessageAppService
 {
     // ctor
 
