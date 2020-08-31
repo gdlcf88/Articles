@@ -1,6 +1,6 @@
 # Reuse ABP vNext Modules to Quickly Implement Application Features
 
-In the [previous article](../../Using-ABP-VNext-To-Develop-An-Address-Book-Application-In-5-Minutes/zh/article.md), we have completed the basic features of the address book application.
+In the [previous article](../../Using-ABP-VNext-To-Develop-An-Address-Book-Application-In-5-Minutes/en/article.md), we have completed the basic features of the address book application.
 
 In this article, we will install the **PrivateMessaging** module to our address book application, so that users can send private messages to each other and get new message notifications on the website.
 
