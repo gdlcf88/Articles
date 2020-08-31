@@ -49,7 +49,7 @@ Now run the AddressBook.Web project, we can see that the private messaging modul
 
 ![HomePage](images/HomePage.png)
 
-## Improved: Prohibit Users From Sending Private Messages to Themselves
+## Improvement: Prohibit Users From Sending Private Messages to Themselves
 
 The ABP framework allows us to override the code in the module. Please create a new file `MyPrivateMessageAppService.cs` in the AddressBook.Application project:
 ```csharp
