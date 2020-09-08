@@ -55,30 +55,30 @@ If you want to install EShop to your existing application, please refer to this 
     public class GiftCardOrderPaidEventHandler: IDistributedEventHandler<OrderPaidEto>, ITransientDependency
     {
         private readonly IEmailSender _emailSender;
-        private readonly IDistributedEventBus _distributedEventBus;
         private readonly IExternalUserLookupServiceProvider _externalUserLookupServiceProvider;
 
         public GiftCardOrderPaidEventHandler(
             IEmailSender emailSender,
-            IDistributedEventBus distributedEventBus,
             IExternalUserLookupServiceProvider externalUserLookupServiceProvider)
         {
             _emailSender = emailSender;
             _distributedEventBus = distributedEventBus;
             _externalUserLookupServiceProvider = externalUserLookupServiceProvider;
         }
-        
+
         public async Task HandleEventAsync(OrderPaidEto eventData)
         {
+            if (!eventData.Order.OrderLines.Any(x => x.ProductGroupName == "GiftCard"))
+            {
+                return;
+            }
+
             var user = await _externalUserLookupServiceProvider.FindByIdAsync(eventData.Order.CustomerUserId);
 
-            await _emailSender.SendAsync(user.Email, "Here is your gift card", "Card number: 123456, password: 123456");
-
-            await _distributedEventBus.PublishAsync(new CompleteOrderEto
+            foreach (var orderLine in eventData.Order.OrderLines.Where(x => x.ProductGroupName == "GiftCard"))
             {
-                TenantId = eventData.Order.TenantId,
-                OrderId = eventData.Order.Id
-            });
+                await _emailSender.SendAsync(user.Email, "Here is your gift card", "Card number: 123456, password: 123456");
+            }
         }
     }
     ```
