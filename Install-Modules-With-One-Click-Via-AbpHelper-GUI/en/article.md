@@ -35,9 +35,9 @@ Then we will find that the `DependsOn`s have been added:
 Run the commands:
 
 ```bash
-cd C:\\Temp\\TryAbpHelper\\src\\TryAbpHelper.DbMigrator
+cd C:\Temp\TryAbpHelper\src\TryAbpHelper.DbMigrator
 dotnet run
-cd ..\\TryAbpHelper.Web
+cd ..\TryAbpHelper.Web
 dotnet run
 ```
 
@@ -45,10 +45,12 @@ Log in and try the Setting UI:
 
 ![UseSettingUi](./images/Use-Setting-Ui.png)
 
-> Use the username `admin` and the password `1q2w3E*`.
+> Use the default username `admin` and password `1q2w3E*` to log in to the app.
 
 ## Conclusion
 
-AbpHelper is helpful for us to manage the application's modules. We can use it to install not only Volosoft's modules but also the community modules.
+AbpHelper is helpful for us to manage the application's modules.
+
+We can use it to install not only Volosoft's modules but also the community modules.
 
 The module management feature of the AbpHelper depends on EasyAbp's [module library](https://github.com/EasyAbp/ModuleLibrary), welcome to register your developed modules through PR.
