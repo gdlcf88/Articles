@@ -1,6 +1,6 @@
 # Introduce DTM To Support Multi-Tenant Multi-Database Scene
 
-I have found a new way to solve the [issue #10036](https://github.com/abpframework/abp/issues/10036) using the DTM's 2-phase messages pattern.
+This article shares a new way to solve [issue #10036](https://github.com/abpframework/abp/issues/10036) using the DTM's 2-phase messages pattern.
 
 The module to be used today is EasyAbp's [Abp.EventBus.Boxes.Dtm](https://github.com/EasyAbp/Abp.EventBus.Boxes.Dtm).
 
