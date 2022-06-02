@@ -1,4 +1,4 @@
-# Introduce DTM Event Boxes To Support Multi-Tenant Multi-Database Scene
+# Introduce DTM To Support Multi-Tenant Multi-Database Scene
 
 I will show you how to solve the [issue #10036](https://github.com/abpframework/abp/issues/10036) using the DTM's 2-phase messages pattern.
 
