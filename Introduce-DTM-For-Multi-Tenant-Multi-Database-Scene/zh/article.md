@@ -28,7 +28,7 @@
 假设你正在使用发件箱发布新的事件:
 ```csharp
 await _distributedEventBus.PublishAsync(eto1, useOutbox: true);
-await _distributedEventBus.PublishAsync(eto2, useOutbox: true);  // useOutbox 现在默认为 true
+await _distributedEventBus.PublishAsync(eto2, useOutbox: true);  // useOutbox 的默认值即 true
 ```
 DTM 发件箱会临时存储这些事件。接下来我们看看，在你完成当前工作单元时它会怎么做：
 ```CSharp
