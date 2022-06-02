@@ -1,4 +1,4 @@
-# Introduce DTM To Support Multi-Tenant Multi-Database Scene
+# Introduce DTM for Multi-Tenant Multi-Database Scene
 
 This article shares a new way to solve [issue #10036](https://github.com/abpframework/abp/issues/10036) using the DTM's 2-phase messages pattern.
 
