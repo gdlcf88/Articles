@@ -1,9 +1,11 @@
 # 重视和解决 ABP 分布式事件乱序问题
 
 ABP Framework 的 Event Boxes 在单个服务场景下，实现了收件和发件的顺序性。但在微服务或多数据库场景下，由于网络延迟和设施效率的限制，
-如果订阅方服务的本地业务与其他服务的事件之间有因果关系，它收到的事件将不是 Linearizability 的，必然会存在物理时间上的收件乱序。
+如果订阅方服务的本地业务与其他服务的事件之间有因果关系，它收到的事件将不是 Linearizability [[1]](#参考) 的，必然会存在物理时间上的收件乱序。
 
-（乱序是如何产生的，插图）
+借用 Daniel Wu 的文章《消息可靠性和顺序(中文)》[[2]](#参考) 中的插图为您展示问题：
+
+![image](https://user-images.githubusercontent.com/30018771/194262471-d5c7aa5f-adc6-4593-b0b2-9738ac56edab.png)
 
 本文在这个事实下，讨论我们在订阅方可能遇到的情况和解决方案。
 
@@ -128,3 +130,8 @@ m1 和 m2 中携带实体信息，至少携带订单的`PaidTime`和`Cancellatio
 本文提到的几个场景，开发者似乎不难分析和做出判断。但在实际生产中，业务往往更复杂，事件数量也会更多，我们很难顾及周全。即便我们在开发时把所有可能的因果关系都找了出来，且对他们做了分析和处理，将来业务变更时，您还能确保万无一失吗？答案恐怕是否定的。
 
 分布式一致性问题是没有银弹的，它永远都在那里，开发者能做的是降低复杂度，通过设计解除因果关系，或手动实现幂等。
+
+## 参考
+
+1. Herlihy, Maurice P.; Wing, Jeannette M. (1987). “Axioms for Concurrent Objects”. Proceedings of the 14th ACM SIGACT-SIGPLAN Symposium on Principles of Programming Languages, POPL ‘87. p. 13
+2. Daniel Wu. (2021). 消息可靠性和顺序(中文). https://danielw.cn/messaging-reliability-and-order-cn
