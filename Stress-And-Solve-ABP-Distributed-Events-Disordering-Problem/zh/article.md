@@ -1,4 +1,4 @@
-# 重视和解决ABP分布式事件乱序问题
+# 重视和解决 ABP 分布式事件乱序问题
 
 ABP Framework 的 Event Boxes 在单个服务场景下，实现了收件和发件的顺序性。但在微服务或多数据库场景下，由于网络延迟和设施效率的限制，
 如果订阅方服务的本地业务与其他服务的事件之间有因果关系，它收到的事件将不是 Linearizability 的，必然会存在物理时间上的收件乱序。
@@ -12,7 +12,7 @@ ABP Framework 的 Event Boxes 在单个服务场景下，实现了收件和发�
 1. 我们关注的是一个用户积分服务，它是一些分布式事件的订阅方。
 2. m1 和 m2 是 **先后发生** 的两个事件，t1 和 t2 分别为订阅方服务收到并处理事件 m1 和 m2 的时间。
 3. t1<t2 代表 t1 早于 t2，称为正序；t1>t2 代表 t1 晚于 t2，称为乱序。
-4. C 代表订阅方服务的状态：C0 为初始状态，CF 为预期的最终状态，CW 为错误的最终状态。
+4. C 代表订阅方服务的状态(Configuration)。C0 为初始状态，CF 为预期的最终状态，CW 为错误的最终状态。
 
 ## 场景
 
@@ -23,11 +23,12 @@ ABP Framework 的 Event Boxes 在单个服务场景下，实现了收件和发�
 * 订阅方业务：根据 m1 和 m2，分别在本地创建 LocalUser 实体
 * 分析：m1 和 m2 顺序不敏感
   * t1<t2 (正序)：
-    * C0 + m1 = C1
-    * C1 + m2 = CF
+
+    [![ordered](https://user-images.githubusercontent.com/30018771/194246857-ec06763c-f2be-4d39-85b2-b5243fb37a65.png)](https://excalidraw.com/#json=EzNloyRKYJa6rfvSNgm2l,HFAPhV9l9kZDT4SGJaZ-zA)
+
   * t1>t2 (乱序)：
-    * C0 + m2 = C2
-    * C2 + m1 = CF
+
+    [![s1-disordered](https://user-images.githubusercontent.com/30018771/194247285-e62dc690-e691-4c38-8616-6e4f12a81975.png)](https://excalidraw.com/#json=94-kB06wg4IZdyFTBNoSe,hyQGl4eKRmgHXAU027iy0w)
 
 无需处理。
 
@@ -38,12 +39,12 @@ ABP Framework 的 Event Boxes 在单个服务场景下，实现了收件和发�
 * 订阅方业务：根据 m1，在本地创建`LocalUser`实体；根据 m2，给`LocalUser.Score`增加积分
 * 分析：m1 和 m2 顺序敏感，但业务上拦截了乱序，不产生一致性问题
   * t1<t2 (正序)：
-    * C0 + m1 = C1
-    * C1 + m2 = CF
+
+    [![ordered](https://user-images.githubusercontent.com/30018771/194246857-ec06763c-f2be-4d39-85b2-b5243fb37a65.png)](https://excalidraw.com/#json=EzNloyRKYJa6rfvSNgm2l,HFAPhV9l9kZDT4SGJaZ-zA)
+
   * t1>t2 (乱序)：
-    * C0 + m2 = C0 (Exception thrown)
-    * C0 + m1 = C1
-    * C1 + m2 = CF
+
+    [![s2-disordered](https://user-images.githubusercontent.com/30018771/194253204-da17cf54-8b6a-410e-89f7-ed01d6a7fd0a.png)](https://excalidraw.com/#json=4DC1glLm6_BfbYG8n5Z1i,laJPAVucCQX9cq7f79FoHg)
 
 无需处理。等待 m1 被处理后，m2 延迟重试处理，实质上达到正序。
 
@@ -54,22 +55,24 @@ ABP Framework 的 Event Boxes 在单个服务场景下，实现了收件和发�
 * 订阅方业务：根据 m1，给`LocalUser.Score`增加积分；根据 m2，如果订单已支付，给`LocalUser.Score`扣减积分
 * 分析： m1 和 m2 顺序敏感，产生一致性问题
   * t1<t2 (正序)：
-    * C0 + m1 = C1
-    * C1 + m2 = CF
+
+    [![ordered](https://user-images.githubusercontent.com/30018771/194246857-ec06763c-f2be-4d39-85b2-b5243fb37a65.png)](https://excalidraw.com/#json=EzNloyRKYJa6rfvSNgm2l,HFAPhV9l9kZDT4SGJaZ-zA)
+
   * t1>t2 (乱序)：
-    * C0 + m2 = C2
-    * C2 + m1 = CW
+
+    [![s3-s4-disordered](https://user-images.githubusercontent.com/30018771/194257491-ff439083-5a18-4afa-b815-a2853a4b5e97.png)](https://excalidraw.com/#json=83yIcQyZr9Nn8QCewL9LK,CeEjjo-knZoUuSkYbjG0BA)
 
 m1 和 m2 中携带实体信息，至少携带订单的`PaidTime`和`CancellationTime`，判断订单的实际状态从而做出正确处理，实质上达到正序。
 
 #### 处理后
 
   * t1<t2 (正序)：
-    * C0 + m1 = C1
-    * C1 + m2 = CF
+
+    [![ordered](https://user-images.githubusercontent.com/30018771/194246857-ec06763c-f2be-4d39-85b2-b5243fb37a65.png)](https://excalidraw.com/#json=EzNloyRKYJa6rfvSNgm2l,HFAPhV9l9kZDT4SGJaZ-zA)
+
   * t1>t2 (乱序)：
-    * C0 + m2 = CF
-    * CF + m1 = CF
+
+    [![s3-resolved](https://user-images.githubusercontent.com/30018771/194258486-03390b1f-9b9e-4802-8099-db9a66d9c0b1.png)](https://excalidraw.com/#json=sgRxqhVcsJ_NfphSDKD2T,1XH7AKhZmSpTSXgjS1feKg)
 
 ### 场景 4，两个事件之间有因果关系，操作不幂等，m1 和 m2 是不同实体产生的事件
 
@@ -78,11 +81,12 @@ m1 和 m2 中携带实体信息，至少携带订单的`PaidTime`和`Cancellatio
 * 订阅方业务：根据 m1，由于`UserEto.Region != LocalUser.Region`，清零`LocalUser.Score`。根据 m2，给`LocalUser.Score`增加积分
 * 分析：m1 和 m2 顺序敏感，产生一致性问题
   * t1<t2 (正序)：
-    * C0 + m1 = C1
-    * C1 + m2 = CF
+
+    [![ordered](https://user-images.githubusercontent.com/30018771/194246857-ec06763c-f2be-4d39-85b2-b5243fb37a65.png)](https://excalidraw.com/#json=EzNloyRKYJa6rfvSNgm2l,HFAPhV9l9kZDT4SGJaZ-zA)
+
   * t1>t2 (乱序)：
-    * C0 + m2 = C2
-    * C2 + m1 = CW
+
+    [![s3-s4-disordered](https://user-images.githubusercontent.com/30018771/194257491-ff439083-5a18-4afa-b815-a2853a4b5e97.png)](https://excalidraw.com/#json=83yIcQyZr9Nn8QCewL9LK,CeEjjo-knZoUuSkYbjG0BA)
 
 我们可以通过这些改动解决问题：
   1. 给`User`实体扩展 int 类型属性`RegionVersion`，默认值为 0，每次 Region 变更时，`RegionVersion`递增 1
@@ -94,14 +98,16 @@ m1 和 m2 中携带实体信息，至少携带订单的`PaidTime`和`Cancellatio
 #### 处理后
 
   * t1<t2 (正序)：
-    * C0 + m1 = C1
-    * C1 + m2 = CF
-  * t1>t2 (乱序) RegionVersion 未过期：
-    * C0 + m2 = C0 (Exception thrown)
-    * C0 + m1 = C1
-    * C1 + m2 = CF
-  * t1>t2 (乱序) RegionVersion 过期：
-    * C0 + m2 = C0 = CF (Skip handling)
+
+    [![ordered](https://user-images.githubusercontent.com/30018771/194246857-ec06763c-f2be-4d39-85b2-b5243fb37a65.png)](https://excalidraw.com/#json=EzNloyRKYJa6rfvSNgm2l,HFAPhV9l9kZDT4SGJaZ-zA)
+
+  * t1>t2 (乱序) 且 RegionVersion 非陈旧：
+
+    [![s4-resolved-1](https://user-images.githubusercontent.com/30018771/194259901-bc57228c-f307-4b7c-9753-56b34b2a5b2b.png)](https://excalidraw.com/#json=y_PkS5DOUfJudbS8jE1h-,VVFmDfNuw4CuyOirCG54FA)
+
+  * t1>t2 (乱序) 且 RegionVersion 陈旧：
+
+    [![s4-resolved-2](https://user-images.githubusercontent.com/30018771/194261319-1785b143-6d41-4f38-b984-d0c4f6d9708e.png)](https://excalidraw.com/#json=74D7htXoXKvDzMXQgJ6aH,6cL_fOdAfwvyHMVqL-21YQ)
 
 #### 更好的处理方案
 
