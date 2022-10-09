@@ -81,7 +81,7 @@ We can make m1 and m2 carry the entity data, at least include the `PaidTime` and
 
     [![s3-resolved](https://user-images.githubusercontent.com/30018771/194258486-03390b1f-9b9e-4802-8099-db9a66d9c0b1.png)](https://excalidraw.com/#json=sgRxqhVcsJ_NfphSDKD2T,1XH7AKhZmSpTSXgjS1feKg)
 
-### Scenario 3: m1 and m2 are causal, m2 handler is not idempotent, m1 and m2 are events from different entities
+### Scenario 4: m1 and m2 are causal, m2 handler is not idempotent, m1 and m2 are events from different entities
 
 * Event m1: event of user A updated (`Region` changed)
 * Event m2: event of order 1 paid
