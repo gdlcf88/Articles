@@ -138,5 +138,5 @@ There is no silver bullet to the distributed consistency problem. It's always th
 
 ## References
 
-1. Herlihy, Maurice P.; Wing, Jeannette M. (1987). "Axioms for Concurrent Objects". Proceedings of the 14th ACM SIGACT-SIGPLAN Symposium on Principles of Programming Languages, POPL ‘87. p. 13
+1. Herlihy, Maurice P.; Wing, Jeannette M. (1987). "Axioms for Concurrent Objects". Proceedings of the 14th ACM SIGACT-SIGPLAN Symposium on Principles of Programming Languages, POPL '87. p. 13
 2. Daniel Wu. (2021). "Messaging Reliability and Ordering". https://danielw.cn/messaging-reliability-and-order
