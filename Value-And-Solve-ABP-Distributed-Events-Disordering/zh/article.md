@@ -136,5 +136,5 @@ m1 和 m2 中携带实体信息，至少携带订单的`PaidTime`和`Cancellatio
 
 ## 参考
 
-1. Herlihy, Maurice P.; Wing, Jeannette M. (1987). "Axioms for Concurrent Objects". Proceedings of the 14th ACM SIGACT-SIGPLAN Symposium on Principles of Programming Languages, POPL ‘87. p. 13
+1. Herlihy, Maurice P.; Wing, Jeannette M. (1987). "Axioms for Concurrent Objects". Proceedings of the 14th ACM SIGACT-SIGPLAN Symposium on Principles of Programming Languages, POPL '87. p. 13
 2. Daniel Wu. (2021). 《消息可靠性和顺序(中文)》. https://danielw.cn/messaging-reliability-and-order-cn
