@@ -1,4 +1,4 @@
-# Value and Solve ABP Distributed Events Disordering
+# Notice and Solve ABP Distributed Events Disordering
 
 ABP Framework 5.0 implemented the strict ordering of outboxes and inboxes for monolithic apps.
 However, in a microservice or multi-database scenario,
