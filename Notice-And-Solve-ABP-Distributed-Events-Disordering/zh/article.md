@@ -128,7 +128,7 @@ m1 和 m2 中携带实体信息，至少携带订单的`PaidTime`和`Cancellatio
 
 ## 关于 ABP 实体同步器
 
-在 ABP 的 DDD 实践中，不同模块之间常常通过实体同步器冗余实体数据。一个典型的案例是 Blogging 模块的 [BlogUserSynchronizer](https://github.com/abpframework/abp/blob/1275f2207fc39d850d23472294e456c8504f20d2/modules/blogging/src/Volo.Blogging.Domain/Volo/Blogging/Users/BlogUserSynchronizer.cs)。此实际上是前文场景 3 的衍生。
+在 ABP 的 DDD 实践中，不同模块之间会通过实体同步器冗余实体数据。一个典型的案例是 Blogging 模块的 [BlogUserSynchronizer](https://github.com/abpframework/abp/blob/1275f2207fc39d850d23472294e456c8504f20d2/modules/blogging/src/Volo.Blogging.Domain/Volo/Blogging/Users/BlogUserSynchronizer.cs)。这实际上是前文场景 3 的一种衍生。
 
 我们给实体增加 int 类型的 `EntityVersion` 属性，此属性的值从 0 开始，并在每次更新实体时，自动递增 1。在实体同步器在处理 EntityUpdatedEto\<UserEto\> 事件时，若 `UserEto.EntityVersion <= BlogUser.EntityVersion`，则跳过处理。就这样，我们解决了问题。我尝试了提供相关的实现：[abpframework/abp#14197](https://github.com/abpframework/abp/pull/14197)。
 
