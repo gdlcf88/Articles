@@ -126,6 +126,12 @@ m1 和 m2 中携带实体信息，至少携带订单的`PaidTime`和`Cancellatio
 2. 如果因果关系来源于实体自身状态，可以通过实体状态检查，实现 handler 的幂等。参考上面场景 3 的做法。
 3. 如果因果关系来源于其他实体，可以尝试通过设计解除因果关系。如果无法解除因果关系，则手动实现幂等（这是不推荐的，因为会带来更大的复杂度）。参考上面场景 4 的做法。
 
+## 关于 ABP 实体同步器
+
+在 ABP 的 DDD 实践中，不同模块之间常常通过实体同步器冗余实体数据。一个典型的案例是 Blogging 模块的 [BlogUserSynchronizer](https://github.com/abpframework/abp/blob/1275f2207fc39d850d23472294e456c8504f20d2/modules/blogging/src/Volo.Blogging.Domain/Volo/Blogging/Users/BlogUserSynchronizer.cs)。此实际上是前文场景 3 的衍生。
+
+我们给实体增加 int 类型的 `EntityVersion` 属性，此属性的值从 0 开始，每次调用 SaveChanges 将它递增 1。在实体同步器在处理 EntityUpdatedEto\<UserEto\> 事件时，若 `UserEto.EntityVersion <= BlogUser.EntityVersion`，则跳过处理。就这样，我们解决了问题。相关的实现请参考：(todo)
+
 ## 结论
 
 即使你的应用当前只是单体，也应关心收件乱序问题，为今后可能到来的架构变化做储备。另外，请放弃实现 Linearizability，因为在微服务或多数据库场景下这是不可能的。
