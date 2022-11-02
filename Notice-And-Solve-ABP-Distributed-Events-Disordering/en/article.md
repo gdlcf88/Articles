@@ -128,6 +128,12 @@ We believe that there are the following principles for solving event disordering
 2. If the causality is from the entity's own state, we can check the entity state to realize the idempotency of the event handler. Refer to Scenario 3 above.
 3. If the causality is from other entities, we can try to dissolve the causality by design. If we fail, implement idempotency manually (this is not recommended since it brings complexity). Refer to Scenario 4 above.
 
+## ABP Entity Synchronizer
+
+In the DDD practice of the ABP framework, modules use entity synchronizers to redundant data of external entities. A typical case is the BlogUserSynchronizer [[3]](#references) of the Blogging module. It is derived from Scenario 3 above.
+
+Let's add a new integer property named `EntityVersion`. Its default value is 0 and increments by one every time the entity changes. When the entity synchronizer gets an `EntityUpdatedEto<UserEto>` event, skip handling if `UserEto.EntityVersion <= BlogUser.EntityVersion` is satisfied. That's it, and we solved the problem. I tried implementing the above feature in the ABP framework. See PR #14197 [[4]](#references).
+
 ## Conclusion
 
 Even if your app is currently monolithic, you should be concerned about the event disordering. That is a preparation for possible architectural changes in the future. Also, please give up implementing linearizability, as it is impossible in microservices or multi-database scenarios.
@@ -140,3 +146,5 @@ There is no silver bullet to the distributed consistency problem. It's always th
 
 1. Herlihy, Maurice P.; Wing, Jeannette M. (1987). "Axioms for Concurrent Objects". Proceedings of the 14th ACM SIGACT-SIGPLAN Symposium on Principles of Programming Languages, POPL '87. p. 13
 2. Daniel Wu. (2021). "Messaging Reliability and Ordering". https://danielw.cn/messaging-reliability-and-order
+3. GitHub abpframework/abp repository. BlogUserSynchronizer.cs. https://github.com/abpframework/abp/blob/1275f2207fc39d850d23472294e456c8504f20d2/modules/blogging/src/Volo.Blogging.Domain/Volo/Blogging/Users/BlogUserSynchronizer.cs
+4. GitHub abpframework/abp repository. PR #14197. https://github.com/abpframework/abp/pull/14197
