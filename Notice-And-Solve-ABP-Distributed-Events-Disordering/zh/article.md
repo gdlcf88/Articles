@@ -67,7 +67,24 @@ ABP Framework 5.0 实现了单体应用场景下，收件箱和发件箱的事�
 
     [![s3-s4-disordered](https://user-images.githubusercontent.com/30018771/194257491-ff439083-5a18-4afa-b815-a2853a4b5e97.png)](https://excalidraw.com/#json=83yIcQyZr9Nn8QCewL9LK,CeEjjo-knZoUuSkYbjG0BA)
 
-m1 和 m2 中携带实体信息，至少携带订单的`PaidTime`和`CancellationTime`，判断订单的实际状态从而做出正确处理，实质上达到正序。
+积分服务在处理订单事件时，于本地冗余`LocalOrder`实体记录订单信息。
+
+```CSharp
+public class LocalOrder : AggregateRoot<Guid>
+{
+    public DateTime? ScoreGrantedTime { get; set; }
+    public bool IsCanceled { get; set; }
+}
+```
+
+* 如果 m1 先被处理
+    1. 处理 m1 时，设置`LocalOrder.ScoreGrantedTime = now`，由于`LocalOrder.ScoreGrantedTime != null`，给用户增加积分。
+    2. 处理 m2 时，由于`LocalOrder.ScoreGrantedTime != null`，给用户扣除积分。
+* 如果 m2 先被处理
+    1. 处理 m2 时，设置`LocalOrder.IsCanceled = true`，由于`LocalOrder.ScoreGrantedTime == null`，不再扣除用户的积分。
+    2. 处理 m1 时，由于`LocalOrder.IsCanceled == true`，不再增加用户的积分。
+
+实质上达到正序。
 
 #### 处理后
 
