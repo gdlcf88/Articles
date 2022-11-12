@@ -57,7 +57,7 @@ ABP Framework 5.0 实现了单体应用场景下，收件箱和发件箱的事�
 
 * 事件 m1：订单 1 支付事件
 * 事件 m2：订单 1 取消事件
-* Handler 的工作：根据 m1，给`LocalUser.Score`增加积分；根据 m2，如果订单已支付且用户已获得积分，给`LocalUser.Score`扣减积分
+* Handler 的工作：根据 m1，给`LocalUser.Score`增加积分；根据 m2，给`LocalUser.Score`扣减积分，积分最低扣到 0，不会为负数。
 * 分析： m1 和 m2 顺序敏感，产生一致性问题
   * t1 < t2 (正序)：
 
@@ -65,36 +65,18 @@ ABP Framework 5.0 实现了单体应用场景下，收件箱和发件箱的事�
 
   * t1 > t2 (乱序)：
 
-    [![s3-disordered](https://user-images.githubusercontent.com/30018771/201468155-e993fc08-b3b3-4dc4-8013-3970ea88107d.png)](https://excalidraw.com/#json=eqpZYwF74HGrnHeplZTuI,1xRbj2iYRJ5sueryX_JBIQ)
+    [![s3-s4-disordered](https://user-images.githubusercontent.com/30018771/201470772-4a01a4fe-f933-4d2c-82cf-e59fd2905bec.png)](https://excalidraw.com/#json=1wnVTL1RZWpvXu3YkHpj8,uFffnJLeWEMTLk3U33Z2ZA)
 
-积分服务在处理订单事件时，于本地冗余`LocalOrder`实体记录订单信息。
+积分服务在本地创建`LocalOrder`实体记录订单处理状态。
 
 ```CSharp
-public class LocalOrder : AggregateRoot<Guid> // including an optimistic lock
+public class LocalOrder : AggregateRoot<Guid>
 {
-    public DateTime? ScoreGrantedTime { get; set; }
-    public bool IsCanceled { get; set; }
+    public bool HasPaidEventHandled { get; set; } // set to true after handling m1
 }
 ```
 
-我们增加限制：m1 handler 在`LocalOrder.IsCanceled == true`时跳过处理。
-
-* 如果 m1 先被处理
-    1. 处理 m1 时
-        * 由于`LocalOrder.IsCanceled == false`，给用户增加积分。
-        * 设置`LocalOrder.ScoreGrantedTime = now`。
-    2. 处理 m2 时
-        * 由于`LocalOrder.ScoreGrantedTime != null`，给用户扣除积分。
-        * 设置`LocalOrder.IsCanceled = true`。
-* 如果 m2 先被处理
-    1. 处理 m2 时
-        * 由于`LocalOrder.ScoreGrantedTime == null`，不再扣除用户的积分。
-        * 设置`LocalOrder.IsCanceled = true`。
-    2. 处理 m1 时
-        * 由于`LocalOrder.IsCanceled == true`，不再增加用户的积分。
-        * 设置`LocalOrder.ScoreGrantedTime = now`。
-
-实质上达到正序。
+当 m2 handler 发现`OrderCanceledEto.OrderPaidTime != null`而`LocalOrder.HasPaidEventHandled == false`，则抛出错误，等待 m1 处理完成，m2 的处理才会成功。我们实质上把场景 3 转化成了场景 2 ，从而实现了幂等。
 
 #### 处理后
 
@@ -104,7 +86,7 @@ public class LocalOrder : AggregateRoot<Guid> // including an optimistic lock
 
   * t1 > t2 (乱序)：
 
-    [![s3-resolved](https://user-images.githubusercontent.com/30018771/201462164-5c5dd546-d88f-4499-9c1a-9dd143304275.png)](https://excalidraw.com/#json=jiP3JAij2QwKa3O6P7vXD,4171TaS0ghx3GlwC36cHxA)
+    [![s2-disordered](https://user-images.githubusercontent.com/30018771/201462287-6155f1b9-dd9f-4452-bb3d-921b2e1b876b.png)](https://excalidraw.com/#json=6azro2d7yq3YVGqmmFkeE,vX5ZLgF_as_otPyRgZX0Yg)
 
 ### 场景 4：m1 和 m2 有因果关系，handler 不是幂等的，m1 和 m2 是不同实体产生的事件
 
@@ -118,7 +100,7 @@ public class LocalOrder : AggregateRoot<Guid> // including an optimistic lock
 
   * t1 > t2 (乱序)：
 
-    [![s4-disordered](https://user-images.githubusercontent.com/30018771/194257491-ff439083-5a18-4afa-b815-a2853a4b5e97.png)](https://excalidraw.com/#json=83yIcQyZr9Nn8QCewL9LK,CeEjjo-knZoUuSkYbjG0BA)
+    [![s3-s4-disordered](https://user-images.githubusercontent.com/30018771/201470772-4a01a4fe-f933-4d2c-82cf-e59fd2905bec.png)](https://excalidraw.com/#json=1wnVTL1RZWpvXu3YkHpj8,uFffnJLeWEMTLk3U33Z2ZA)
 
 我们可以通过这些改动解决问题：
   1. 给`User`实体扩展 int 类型属性`RegionVersion`，默认值为 0，每次 Region 变更时，`RegionVersion`递增 1
@@ -147,7 +129,7 @@ public class LocalOrder : AggregateRoot<Guid> // including an optimistic lock
 
 ### 场景 5：ABP 实体同步器
 
-在 ABP 的 DDD 实践中，不同模块之间会通过实体同步器冗余实体数据。一个典型的案例是 Blogging 模块的 BlogUserSynchronizer [[3]](#参考)。这实际上是前文场景 3 的一种衍生。本场景的不同之处在于，过期的事件可以被跳过处理。
+在 ABP 的 DDD 实践中，不同模块之间会通过实体同步器冗余实体数据。一个典型的案例是 Blogging 模块的 BlogUserSynchronizer [[3]](#参考)。本场景的特别之处在于，过期的事件可以被跳过处理。
 
 * 事件 m1：用户 A 变更事件
 * 事件 m2：用户 A 变更事件
