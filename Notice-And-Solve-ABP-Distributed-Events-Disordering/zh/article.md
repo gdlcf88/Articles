@@ -19,14 +19,14 @@ ABP Framework 5.0 实现了单体应用场景下，收件箱和发件箱的事�
 4. `t1 < t2` 代表 t1 早于 t2，称为正序；`t1 > t2` 代表 t1 晚于 t2，称为乱序。
 5. C 代表订阅方服务的状态(Configuration)。`C0` 为初始状态，`CF` 为预期的最终状态，`CW` 为错误的最终状态。
 
-## 场景
+## 案例
 
-### 场景 1：m1 和 m2 没有因果关系
+### 案例 1
 
 * 事件 m1：用户 A 创建事件
 * 事件 m2：用户 B 创建事件
 * Handler 的工作：根据 m1 和 m2，分别在本地创建 LocalUser 实体
-* 分析：m1 和 m2 顺序不敏感
+* 分析：m1 和 m2 没有因果关系，顺序不敏感
   * t1 < t2 (正序)：
 
     [![ordered](https://user-images.githubusercontent.com/30018771/194246857-ec06763c-f2be-4d39-85b2-b5243fb37a65.png)](https://excalidraw.com/#json=EzNloyRKYJa6rfvSNgm2l,HFAPhV9l9kZDT4SGJaZ-zA)
@@ -37,12 +37,12 @@ ABP Framework 5.0 实现了单体应用场景下，收件箱和发件箱的事�
 
 无需处理。
 
-### 场景 2：m1 和 m2 有因果关系，但 handler 是幂等的
+### 案例 2
 
 * 事件 m1：用户 A 创建事件
 * 事件 m2：订单 1 支付事件
 * Handler 的工作：根据 m1，在本地创建`LocalUser`实体；根据 m2，给`LocalUser.Score`增加积分
-* 分析：m1 和 m2 顺序敏感，但业务上拦截了乱序，不产生一致性问题
+* 分析：m1 和 m2 有因果关系，但 handler 是幂等的。m1 和 m2 顺序敏感，但业务上拦截了乱序，不产生一致性问题
   * t1 < t2 (正序)：
 
     [![ordered](https://user-images.githubusercontent.com/30018771/194246857-ec06763c-f2be-4d39-85b2-b5243fb37a65.png)](https://excalidraw.com/#json=EzNloyRKYJa6rfvSNgm2l,HFAPhV9l9kZDT4SGJaZ-zA)
@@ -53,12 +53,12 @@ ABP Framework 5.0 实现了单体应用场景下，收件箱和发件箱的事�
 
 无需处理。待 m1 被处理后，m2 延迟重试处理，实质上达到正序。
 
-### 场景 3：m1 和 m2 有因果关系，handler 不是幂等的，m1 和 m2 是相同实体产生的事件
+### 案例 3
 
 * 事件 m1：订单 1 支付事件
 * 事件 m2：订单 1 取消事件
 * Handler 的工作：根据 m1，给`LocalUser.Score`增加积分；根据 m2，给`LocalUser.Score`扣减积分，积分最低扣到 0，不会为负数
-* 分析： m1 和 m2 顺序敏感，产生一致性问题
+* 分析： m1 和 m2 有因果关系，handler 不是幂等的。m1 和 m2 顺序敏感，产生一致性问题
   * t1 < t2 (正序)：
 
     [![ordered](https://user-images.githubusercontent.com/30018771/194246857-ec06763c-f2be-4d39-85b2-b5243fb37a65.png)](https://excalidraw.com/#json=EzNloyRKYJa6rfvSNgm2l,HFAPhV9l9kZDT4SGJaZ-zA)
@@ -78,7 +78,7 @@ public class LocalOrder : AggregateRoot<Guid>
 
 当 m2 handler 发现`OrderCanceledEto.OrderPaidTime != null`而`LocalOrder.HasPaidEventHandled == false`，则抛出错误。待 m1 被处理后，m2 延迟重试处理，实质上达到正序。
 
-我们实质上把本场景 3 转化成了场景 2 ，从而实现了幂等。
+我们实质上把本案例 3 转化成了案例 2 的情况，从而实现了幂等。
 
 #### 处理后
 
@@ -90,12 +90,12 @@ public class LocalOrder : AggregateRoot<Guid>
 
     [![s3-resolved](https://user-images.githubusercontent.com/30018771/201462287-6155f1b9-dd9f-4452-bb3d-921b2e1b876b.png)](https://excalidraw.com/#json=6azro2d7yq3YVGqmmFkeE,vX5ZLgF_as_otPyRgZX0Yg)
 
-### 场景 4：m1 和 m2 有因果关系，handler 不是幂等的，m1 和 m2 是不同实体产生的事件
+### 案例 4
 
 * 事件 m1：用户 A 变更事件 (变更了可用区 `Region`)
 * 事件 m2：订单 1 支付事件
 * Handler 的工作：根据 m1，由于`UserEto.Region != LocalUser.Region`，清零`LocalUser.Score`。根据 m2，给`LocalUser.Score`增加积分
-* 分析：m1 和 m2 顺序敏感，产生一致性问题
+* 分析：m1 和 m2 有因果关系，handler 不是幂等的。m1 和 m2 顺序敏感，产生一致性问题
   * t1 < t2 (正序)：
 
     [![ordered](https://user-images.githubusercontent.com/30018771/194246857-ec06763c-f2be-4d39-85b2-b5243fb37a65.png)](https://excalidraw.com/#json=EzNloyRKYJa6rfvSNgm2l,HFAPhV9l9kZDT4SGJaZ-zA)
@@ -133,14 +133,14 @@ public class LocalOrder : AggregateRoot<Guid>
 
     [![s4-resolved](https://user-images.githubusercontent.com/30018771/201462287-6155f1b9-dd9f-4452-bb3d-921b2e1b876b.png)](https://excalidraw.com/#json=6azro2d7yq3YVGqmmFkeE,vX5ZLgF_as_otPyRgZX0Yg)
 
-### 场景 5：ABP 实体同步器
+### 案例 5：ABP 实体同步器
 
-在 ABP 的 DDD 实践中，不同模块之间会通过实体同步器冗余实体数据。一个典型的案例是 Blogging 模块的 BlogUserSynchronizer [[3]](#参考)。本场景的特别之处在于，过期的事件可以被跳过处理。
+在 ABP 的 DDD 实践中，不同模块之间会通过实体同步器冗余实体数据。一个典型的案例是 Blogging 模块的 BlogUserSynchronizer [[3]](#参考)。本案例的特别之处在于，如果不是有极严的要求，过期的事件可以被跳过处理。
 
 * 事件 m1：用户 A 变更事件
 * 事件 m2：用户 A 变更事件
 * Handler 的工作：根据 m1/m2，更新`LocalUser`实体中的用户资料
-* 分析： m1 和 m2 顺序敏感，产生一致性问题
+* 分析：一旦 m2 早于 m1 被处理，则旧资料会覆盖新资料，产生一致性问题
   * t1 < t2 (正序)：
 
     [![ordered](https://user-images.githubusercontent.com/30018771/194246857-ec06763c-f2be-4d39-85b2-b5243fb37a65.png)](https://excalidraw.com/#json=EzNloyRKYJa6rfvSNgm2l,HFAPhV9l9kZDT4SGJaZ-zA)
@@ -166,15 +166,15 @@ public class LocalOrder : AggregateRoot<Guid>
 笔者认为，解决事件乱序问题有以下思路。
 
 1. 尽可能保持 DistributedEventHandler 的业务逻辑简单，以便发现潜在的乱序问题。
-2. 某些情况下，我们可以通过在本地记录实体的状态，将 handler 转化为幂等，就如上面场景 3 演示的那样。
-3. 某些情况下，我们可以通过调整业务设计，解除因果关系，就如上面场景 4 演示的那样。
+2. 某些情况下，我们可以通过在本地记录实体的状态，将 handler 转化为幂等，就如上面案例 3 演示的那样。
+3. 某些情况下，我们可以通过调整业务设计，解除因果关系，就如上面案例 4 演示的那样。
 4. 实体同步器应采用 EntityVersion 的设计，以避免同步到过期的数据。
 
 ## 结论
 
 即使你的应用当前只是单体，也应关心收件乱序问题，为今后可能到来的架构变化做储备。另外，请放弃实现 Linearizability，因为在微服务或多数据库场景下这是不可能的。
 
-本文提到的几个场景，开发者似乎不难找出一致性问题的隐患。但在实际生产中，业务往往更复杂，事件数量也会更多，我们很难顾及周全。即便我们在开发时把所有可能的因果关系都找了出来，并且处理了它们，将来业务变更时，我们还能确保万无一失吗？答案恐怕是否定的。
+本文提到的几个案例，开发者似乎不难找出一致性问题的隐患。但在实际生产中，业务往往更复杂，事件数量也会更多，我们很难顾及周全。即便我们在开发时把所有可能的因果关系都找了出来，并且处理了它们，将来业务变更时，我们还能确保万无一失吗？答案恐怕是否定的。
 
 分布式一致性问题是没有银弹的，它永远都在那里，开发者能做的是降低复杂度，通过设计解除因果关系，或手动实现幂等。
 
