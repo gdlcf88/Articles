@@ -57,7 +57,7 @@ ABP Framework 5.0 实现了单体应用场景下，收件箱和发件箱的事�
 
 * 事件 m1：订单 1 支付事件
 * 事件 m2：订单 1 取消事件
-* Handler 的工作：根据 m1，给`LocalUser.Score`增加积分；根据 m2，如果订单已支付，给`LocalUser.Score`扣减积分
+* Handler 的工作：根据 m1，给`LocalUser.Score`增加积分；根据 m2，如果订单已支付且用户已获得积分，给`LocalUser.Score`扣减积分
 * 分析： m1 和 m2 顺序敏感，产生一致性问题
   * t1 < t2 (正序)：
 
