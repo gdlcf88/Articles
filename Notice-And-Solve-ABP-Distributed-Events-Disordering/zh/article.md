@@ -57,7 +57,7 @@ ABP Framework 5.0 实现了单体应用场景下，收件箱和发件箱的事�
 
 * 事件 m1：订单 1 支付事件
 * 事件 m2：订单 1 取消事件
-* Handler 的工作：根据 m1，给`LocalUser.Score`增加积分；根据 m2，给`LocalUser.Score`扣减积分，积分最低扣到 0，不会为负数。
+* Handler 的工作：根据 m1，给`LocalUser.Score`增加积分；根据 m2，给`LocalUser.Score`扣减积分，积分最低扣到 0，不会为负数
 * 分析： m1 和 m2 顺序敏感，产生一致性问题
   * t1 < t2 (正序)：
 
@@ -65,7 +65,7 @@ ABP Framework 5.0 实现了单体应用场景下，收件箱和发件箱的事�
 
   * t1 > t2 (乱序)：
 
-    [![s3-s4-disordered](https://user-images.githubusercontent.com/30018771/201470772-4a01a4fe-f933-4d2c-82cf-e59fd2905bec.png)](https://excalidraw.com/#json=1wnVTL1RZWpvXu3YkHpj8,uFffnJLeWEMTLk3U33Z2ZA)
+    [![s3-disordered](https://user-images.githubusercontent.com/30018771/201470772-4a01a4fe-f933-4d2c-82cf-e59fd2905bec.png)](https://excalidraw.com/#json=1wnVTL1RZWpvXu3YkHpj8,uFffnJLeWEMTLk3U33Z2ZA)
 
 积分服务在本地创建`LocalOrder`实体记录订单处理状态。
 
@@ -76,7 +76,9 @@ public class LocalOrder : AggregateRoot<Guid>
 }
 ```
 
-当 m2 handler 发现`OrderCanceledEto.OrderPaidTime != null`而`LocalOrder.HasPaidEventHandled == false`，则抛出错误。待 m1 被处理后，m2 延迟重试处理，实质上达到正序。。我们实质上把场景 3 转化成了场景 2 ，从而实现了幂等。
+当 m2 handler 发现`OrderCanceledEto.OrderPaidTime != null`而`LocalOrder.HasPaidEventHandled == false`，则抛出错误。待 m1 被处理后，m2 延迟重试处理，实质上达到正序。
+
+我们实质上把本场景 3 转化成了场景 2 ，从而实现了幂等。
 
 #### 处理后
 
@@ -86,7 +88,7 @@ public class LocalOrder : AggregateRoot<Guid>
 
   * t1 > t2 (乱序)：
 
-    [![s2-disordered](https://user-images.githubusercontent.com/30018771/201462287-6155f1b9-dd9f-4452-bb3d-921b2e1b876b.png)](https://excalidraw.com/#json=6azro2d7yq3YVGqmmFkeE,vX5ZLgF_as_otPyRgZX0Yg)
+    [![s3-resolved](https://user-images.githubusercontent.com/30018771/201462287-6155f1b9-dd9f-4452-bb3d-921b2e1b876b.png)](https://excalidraw.com/#json=6azro2d7yq3YVGqmmFkeE,vX5ZLgF_as_otPyRgZX0Yg)
 
 ### 场景 4：m1 和 m2 有因果关系，handler 不是幂等的，m1 和 m2 是不同实体产生的事件
 
@@ -100,14 +102,16 @@ public class LocalOrder : AggregateRoot<Guid>
 
   * t1 > t2 (乱序)：
 
-    [![s3-s4-disordered](https://user-images.githubusercontent.com/30018771/201470772-4a01a4fe-f933-4d2c-82cf-e59fd2905bec.png)](https://excalidraw.com/#json=1wnVTL1RZWpvXu3YkHpj8,uFffnJLeWEMTLk3U33Z2ZA)
+    [![s4-disordered](https://user-images.githubusercontent.com/30018771/201470772-4a01a4fe-f933-4d2c-82cf-e59fd2905bec.png)](https://excalidraw.com/#json=1wnVTL1RZWpvXu3YkHpj8,uFffnJLeWEMTLk3U33Z2ZA)
 
 我们可以通过这些改动解决问题：
-  1. 给`User`实体扩展 int 类型属性`RegionVersion`，默认值为 0，每次 Region 变更时，`RegionVersion`递增 1
-  2. 在用户支付时，本地服务调用 Identity 远程服务，将查得的`UserDto.RegionVersion`写入`OrderPaidEto.UserRegionVersion`，与事件 m2 一起发布
-  3. 处理 m1 时，应将`UserEto.RegionVersion`同步到`LocalUser.RegionVersion`
-  4. 处理 m2 时，若`OrderPaidEto.RegionVersion < LocalUser.RegionVersion`，则抛弃事件，结束处理。这是因为变更可用区会清零积分，旧可用区的积分应被抛弃，而不是加到新可用区的积分中
-  5. 处理 m2 时，调用 Identity 远程服务，若查得`UserDto.RegionVersion == LocalUser.RegionVersion`，则给用户增加积分，否则抛出错误等待下次重试。这是为了确保 RegionVersion 的同步（包含清空用户积分）工作已完成
+  1. 给`User`实体扩展 int 类型属性`RegionVersion`，默认值为 0，每次 Region 变更时，`RegionVersion`递增 1。
+  2. 积分服务使用`LocalUserRegion.Score`记录用户的积分，而非使用`LocalUser.Score`。
+  3. 处理 m1 时，若`UserEto.RegionVersion`更新，则创建新的`LocalUserRegion`实体，初始的积分为 0，相当于变更 Region 即清零积分。
+  4. 在用户支付时，本地服务调用 Identity 远程服务，将查得的`UserDto.RegionVersion`写入事件 m2 的`OrderPaidEto.UserRegionVersion`。
+  5. 处理 m2 时，根据`OrderPaidEto.UserRegionVersion`，给对应的`LocalUserRegion`增加积分。
+
+我们解除了 m1 和 m2 的因果关系，从而实现了幂等。
 
 #### 处理后
 
@@ -115,17 +119,9 @@ public class LocalOrder : AggregateRoot<Guid>
 
     [![ordered](https://user-images.githubusercontent.com/30018771/194246857-ec06763c-f2be-4d39-85b2-b5243fb37a65.png)](https://excalidraw.com/#json=EzNloyRKYJa6rfvSNgm2l,HFAPhV9l9kZDT4SGJaZ-zA)
 
-  * t1 > t2 (乱序) 且 RegionVersion 非陈旧：
+  * t1 > t2 (乱序) ：
 
-    [![s4-resolved-1](https://user-images.githubusercontent.com/30018771/201462470-e8f2db4e-c9b8-4573-85fd-dc0c4ef13a06.png)](https://excalidraw.com/#json=9JMMsZ6TxPXEHXzkpK1wB,MQ2zUJn5bvIGYJoNEG1Ipg)
-
-  * t1 > t2 (乱序) 且 RegionVersion 陈旧：
-
-    [![s4-resolved-2](https://user-images.githubusercontent.com/30018771/201462504-7cb9bfc4-9e5b-4d7f-964b-cd22ad64beae.png)](https://excalidraw.com/#json=L-kla8BNEjlPQzlrRKQ81,DGcQU-U3p9MF9rnEildiVQ)
-
-#### 更好的处理方案
-
-试着转换一下思路，如果为每位用户在每个 RegionVersion 单独建立实体记录积分，m1 与 m2 就不再是因果关系，顺序性的要求也就不存在了。
+    [![s4-resolved](https://user-images.githubusercontent.com/30018771/201462287-6155f1b9-dd9f-4452-bb3d-921b2e1b876b.png)](https://excalidraw.com/#json=6azro2d7yq3YVGqmmFkeE,vX5ZLgF_as_otPyRgZX0Yg)
 
 ### 场景 5：ABP 实体同步器
 
@@ -142,7 +138,6 @@ public class LocalOrder : AggregateRoot<Guid>
   * t1 > t2 (乱序)：
 
     [![s5-disordered](https://user-images.githubusercontent.com/30018771/201468277-40c792ce-9a9f-4b29-b46c-c4392b3b79bb.png)](https://excalidraw.com/#json=SwmSL9qcgrFZA5UV8HuPD,_LiJ20bKVHx8D7x5c-KfAw)
-
 
 我们给实体增加 int 类型的 `EntityVersion` 属性，此属性的值从 0 开始，并在每次更新实体时，自动递增 1。在实体同步器处理 `EntityUpdatedEto<UserEto>` 事件时，若 `UserEto.EntityVersion <= LocalUser.EntityVersion`，则跳过处理。就这样，我们解决了问题。我尝试了在 ABP 框架实现以上能力，见 PR #14197 [[4]](#参考)。
 
@@ -161,9 +156,9 @@ public class LocalOrder : AggregateRoot<Guid>
 笔者认为，解决事件乱序问题有以下原则。
 
 1. 尽可能保持 DistributedEventHandler 的业务逻辑简单，以便发现潜在的乱序问题。
-2. 如果因果关系来源于实体自身状态，可以通过实体状态检查，实现 handler 的幂等。参考上面场景 3 的做法。
-3. 如果因果关系来源于其他实体，可以尝试通过设计解除因果关系。如果无法解除因果关系，则手动实现幂等（这是不推荐的，因为会带来更大的复杂度）。参考上面场景 4 的做法。
-4. 实体同步器应采用 EntityVersion 的设计，以避免同步已过期的数据。
+2. 某些情况下，我们可以通过在本地记录实体的状态，将 handler 转化为幂等，就如上面场景 3 演示的那样。
+3. 某些情况下，我们可以通过调整业务设计，解除因果关系，就如上面场景 4 演示的那样。
+4. 实体同步器应采用 EntityVersion 的设计，以避免同步到过期的数据。
 
 ## 结论
 
