@@ -37,7 +37,7 @@ ABP Framework 5.0 实现了单体应用场景下，收件箱和发件箱的事�
 
 无需处理。
 
-### 场景 2：m1 和 m2 有因果关系，但 m2 handler 是幂等的
+### 场景 2：m1 和 m2 有因果关系，但 handler 是幂等的
 
 * 事件 m1：用户 A 创建事件
 * 事件 m2：订单 1 支付事件
@@ -53,7 +53,7 @@ ABP Framework 5.0 实现了单体应用场景下，收件箱和发件箱的事�
 
 无需处理。待 m1 被处理后，m2 延迟重试处理，实质上达到正序。
 
-### 场景 3：m1 和 m2 有因果关系，m2 handler 不是幂等的，m1 和 m2 是相同实体产生的事件
+### 场景 3：m1 和 m2 有因果关系，handler 不是幂等的，m1 和 m2 是相同实体产生的事件
 
 * 事件 m1：订单 1 支付事件
 * 事件 m2：订单 1 取消事件
@@ -106,7 +106,7 @@ public class LocalOrder : AggregateRoot<Guid> // including an optimistic lock
 
     [![s3-resolved](https://user-images.githubusercontent.com/30018771/201462164-5c5dd546-d88f-4499-9c1a-9dd143304275.png)](https://excalidraw.com/#json=jiP3JAij2QwKa3O6P7vXD,4171TaS0ghx3GlwC36cHxA)
 
-### 场景 4：m1 和 m2 有因果关系，m2 handler 不是幂等的，m1 和 m2 是不同实体产生的事件
+### 场景 4：m1 和 m2 有因果关系，handler 不是幂等的，m1 和 m2 是不同实体产生的事件
 
 * 事件 m1：用户 A 变更事件 (变更了可用区 `Region`)
 * 事件 m2：订单 1 支付事件
