@@ -65,7 +65,7 @@ ABP Framework 5.0 实现了单体应用场景下，收件箱和发件箱的事�
 
   * t1 > t2 (乱序)：
 
-    [![s3-s4-disordered](https://user-images.githubusercontent.com/30018771/194257491-ff439083-5a18-4afa-b815-a2853a4b5e97.png)](https://excalidraw.com/#json=83yIcQyZr9Nn8QCewL9LK,CeEjjo-knZoUuSkYbjG0BA)
+    [![s3-disordered](https://user-images.githubusercontent.com/30018771/201461364-1f116186-60ca-4c7d-a646-774f51732b3a.png)](https://excalidraw.com/#json=0AOAd-W3Ho9H-Z0EJVoh0,Xw-m-xo-OUj2_z5etFaI-g)
 
 积分服务在处理订单事件时，于本地冗余`LocalOrder`实体记录订单信息。
 
@@ -108,7 +108,7 @@ public class LocalOrder : AggregateRoot<Guid>
 
   * t1 > t2 (乱序)：
 
-    [![s3-s4-disordered](https://user-images.githubusercontent.com/30018771/194257491-ff439083-5a18-4afa-b815-a2853a4b5e97.png)](https://excalidraw.com/#json=83yIcQyZr9Nn8QCewL9LK,CeEjjo-knZoUuSkYbjG0BA)
+    [![s4-disordered](https://user-images.githubusercontent.com/30018771/194257491-ff439083-5a18-4afa-b815-a2853a4b5e97.png)](https://excalidraw.com/#json=83yIcQyZr9Nn8QCewL9LK,CeEjjo-knZoUuSkYbjG0BA)
 
 我们可以通过这些改动解决问题：
   1. 给`User`实体扩展 int 类型属性`RegionVersion`，默认值为 0，每次 Region 变更时，`RegionVersion`递增 1
