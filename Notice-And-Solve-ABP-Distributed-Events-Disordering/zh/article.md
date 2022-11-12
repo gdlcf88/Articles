@@ -70,7 +70,7 @@ ABP Framework 5.0 实现了单体应用场景下，收件箱和发件箱的事�
 积分服务在处理订单事件时，于本地冗余`LocalOrder`实体记录订单信息。
 
 ```CSharp
-public class LocalOrder : AggregateRoot<Guid>
+public class LocalOrder : AggregateRoot<Guid> // including an optimistic lock
 {
     public DateTime? ScoreGrantedTime { get; set; }
     public bool IsCanceled { get; set; }
