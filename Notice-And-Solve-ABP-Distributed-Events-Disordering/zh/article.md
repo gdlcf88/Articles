@@ -76,7 +76,7 @@ public class LocalOrder : AggregateRoot<Guid>
 }
 ```
 
-当 m2 handler 发现`OrderCanceledEto.OrderPaidTime != null`而`LocalOrder.HasPaidEventHandled == false`，则抛出错误，等待 m1 处理完成，m2 的处理才会成功。我们实质上把场景 3 转化成了场景 2 ，从而实现了幂等。
+当 m2 handler 发现`OrderCanceledEto.OrderPaidTime != null`而`LocalOrder.HasPaidEventHandled == false`，则抛出错误。待 m1 被处理后，m2 延迟重试处理，实质上达到正序。。我们实质上把场景 3 转化成了场景 2 ，从而实现了幂等。
 
 #### 处理后
 
