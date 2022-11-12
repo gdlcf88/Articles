@@ -147,7 +147,7 @@ public class LocalOrder : AggregateRoot<Guid> // including an optimistic lock
 
 ### 场景 5：ABP 实体同步器
 
-在 ABP 的 DDD 实践中，不同模块之间会通过实体同步器冗余实体数据。一个典型的案例是 Blogging 模块的 BlogUserSynchronizer [[3]](#参考)。这实际上是前文场景 3 的一种衍生。不同之处在于，本场景中 m1 和 m2 是同种事件。
+在 ABP 的 DDD 实践中，不同模块之间会通过实体同步器冗余实体数据。一个典型的案例是 Blogging 模块的 BlogUserSynchronizer [[3]](#参考)。这实际上是前文场景 3 的一种衍生。本场景的不同之处在于，过期的事件可以被跳过处理。
 
 * 事件 m1：用户 A 变更事件
 * 事件 m2：用户 A 变更事件
