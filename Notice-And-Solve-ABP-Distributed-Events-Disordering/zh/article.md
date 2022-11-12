@@ -77,12 +77,22 @@ public class LocalOrder : AggregateRoot<Guid>
 }
 ```
 
+我们增加限制：m1 handler 在`LocalOrder.IsCanceled == true`时跳过处理。
+
 * 如果 m1 先被处理
-    1. 处理 m1 时，设置`LocalOrder.ScoreGrantedTime = now`，由于`LocalOrder.ScoreGrantedTime != null`，给用户增加积分。
-    2. 处理 m2 时，由于`LocalOrder.ScoreGrantedTime != null`，给用户扣除积分。
+    1. 处理 m1 时
+        * 由于`LocalOrder.IsCanceled == false`，给用户增加积分。
+        * 设置`LocalOrder.ScoreGrantedTime = now`。
+    2. 处理 m2 时
+        * 由于`LocalOrder.ScoreGrantedTime != null`，给用户扣除积分。
+        * 设置`LocalOrder.IsCanceled = true`。
 * 如果 m2 先被处理
-    1. 处理 m2 时，设置`LocalOrder.IsCanceled = true`，由于`LocalOrder.ScoreGrantedTime == null`，不再扣除用户的积分。
-    2. 处理 m1 时，由于`LocalOrder.IsCanceled == true`，不再增加用户的积分。
+    1. 处理 m2 时
+        * 由于`LocalOrder.ScoreGrantedTime == null`，不再扣除用户的积分。
+        * 设置`LocalOrder.IsCanceled = true`。
+    2. 处理 m1 时
+        * 由于`LocalOrder.IsCanceled == true`，不再增加用户的积分。
+        * 设置`LocalOrder.ScoreGrantedTime = now`。
 
 实质上达到正序。
 
