@@ -49,7 +49,7 @@ ABP Framework 5.0 实现了单体应用场景下，收件箱和发件箱的事�
 
   * t1 > t2 (乱序)：
 
-    [![s2-disordered](https://user-images.githubusercontent.com/30018771/194253204-da17cf54-8b6a-410e-89f7-ed01d6a7fd0a.png)](https://excalidraw.com/#json=4DC1glLm6_BfbYG8n5Z1i,laJPAVucCQX9cq7f79FoHg)
+    [![s2-disordered](https://user-images.githubusercontent.com/30018771/201462287-6155f1b9-dd9f-4452-bb3d-921b2e1b876b.png)](https://excalidraw.com/#json=6azro2d7yq3YVGqmmFkeE,vX5ZLgF_as_otPyRgZX0Yg)
 
 无需处理。待 m1 被处理后，m2 延迟重试处理，实质上达到正序。
 
@@ -65,7 +65,7 @@ ABP Framework 5.0 实现了单体应用场景下，收件箱和发件箱的事�
 
   * t1 > t2 (乱序)：
 
-    [![s3-disordered](https://user-images.githubusercontent.com/30018771/201461364-1f116186-60ca-4c7d-a646-774f51732b3a.png)](https://excalidraw.com/#json=0AOAd-W3Ho9H-Z0EJVoh0,Xw-m-xo-OUj2_z5etFaI-g)
+    [![s3-disordered](https://user-images.githubusercontent.com/30018771/201462126-ae30ed25-51a4-4af3-b1c3-926980991cfe.png)](https://excalidraw.com/#json=jaF6Ts9VKFZ6kZuLrylJ5,Aj9-Mgu9uTuvmj1ezb1ARQ)
 
 积分服务在处理订单事件时，于本地冗余`LocalOrder`实体记录订单信息。
 
@@ -94,7 +94,7 @@ public class LocalOrder : AggregateRoot<Guid>
 
   * t1 > t2 (乱序)：
 
-    [![s3-resolved](https://user-images.githubusercontent.com/30018771/201461615-f996a869-8e60-41bc-92ce-dafb1999e07d.png)](https://excalidraw.com/#json=fWKgQ6Zk9BMAthtsFMTJE,ybX2Txv7SZnc3qmxhl2ujg)
+    [![s3-resolved](https://user-images.githubusercontent.com/30018771/201462164-5c5dd546-d88f-4499-9c1a-9dd143304275.png)](https://excalidraw.com/#json=jiP3JAij2QwKa3O6P7vXD,4171TaS0ghx3GlwC36cHxA)
 
 ### 场景 4：m1 和 m2 有因果关系，m2 handler 不是幂等的，m1 和 m2 是不同实体产生的事件
 
@@ -125,11 +125,11 @@ public class LocalOrder : AggregateRoot<Guid>
 
   * t1 > t2 (乱序) 且 RegionVersion 非陈旧：
 
-    [![s4-resolved-1](https://user-images.githubusercontent.com/30018771/194259901-bc57228c-f307-4b7c-9753-56b34b2a5b2b.png)](https://excalidraw.com/#json=y_PkS5DOUfJudbS8jE1h-,VVFmDfNuw4CuyOirCG54FA)
+    [![s4-resolved-1](https://user-images.githubusercontent.com/30018771/201462470-e8f2db4e-c9b8-4573-85fd-dc0c4ef13a06.png)](https://excalidraw.com/#json=9JMMsZ6TxPXEHXzkpK1wB,MQ2zUJn5bvIGYJoNEG1Ipg)
 
   * t1 > t2 (乱序) 且 RegionVersion 陈旧：
 
-    [![s4-resolved-2](https://user-images.githubusercontent.com/30018771/194261319-1785b143-6d41-4f38-b984-d0c4f6d9708e.png)](https://excalidraw.com/#json=74D7htXoXKvDzMXQgJ6aH,6cL_fOdAfwvyHMVqL-21YQ)
+    [![s4-resolved-2](https://user-images.githubusercontent.com/30018771/201462504-7cb9bfc4-9e5b-4d7f-964b-cd22ad64beae.png)](https://excalidraw.com/#json=L-kla8BNEjlPQzlrRKQ81,DGcQU-U3p9MF9rnEildiVQ)
 
 #### 更好的处理方案
 
