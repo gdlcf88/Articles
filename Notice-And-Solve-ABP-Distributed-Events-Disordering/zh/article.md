@@ -105,11 +105,21 @@ public class LocalOrder : AggregateRoot<Guid>
     [![s4-disordered](https://user-images.githubusercontent.com/30018771/201470772-4a01a4fe-f933-4d2c-82cf-e59fd2905bec.png)](https://excalidraw.com/#json=1wnVTL1RZWpvXu3YkHpj8,uFffnJLeWEMTLk3U33Z2ZA)
 
 我们可以通过这些改动解决问题：
-  1. 给`User`实体扩展 int 类型属性`RegionVersion`，默认值为 0，每次 Region 变更时，`RegionVersion`递增 1。
-  2. 积分服务使用`LocalUserRegion.Score`记录用户的积分，而非使用`LocalUser.Score`。
-  3. 处理 m1 时，若`UserEto.RegionVersion`更新，则创建新的`LocalUserRegion`实体，初始的积分为 0，相当于变更 Region 即清零积分。
-  4. 在用户支付时，本地服务调用 Identity 远程服务，将查得的`UserDto.RegionVersion`写入事件 m2 的`OrderPaidEto.UserRegionVersion`。
-  5. 处理 m2 时，根据`OrderPaidEto.UserRegionVersion`，给对应的`LocalUserRegion`增加积分。
+
+1. 给`User`实体扩展 int 类型属性`RegionVersion`，默认值为 0，每次 Region 变更时，`RegionVersion`递增 1。
+2. 积分服务使用`LocalUserRegion.Score`记录用户的积分，而非使用`LocalUser.Score`。
+    ```CSharp
+    public class LocalUserRegion : AggregateRoot<Guid>
+    {
+        public Guid UserId { get; set; }
+        public string Region { get; set; }
+        public int RegionVersion { get; set; }
+        public int Score { get; set; }
+    }
+    ```
+3. 处理 m1 时，若`UserEto.RegionVersion`更新，则创建新的`LocalUserRegion`实体，初始的积分为 0，相当于变更 Region 即清零积分。
+4. 在用户支付时，本地服务调用 Identity 远程服务，将查得的`UserDto.RegionVersion`写入事件 m2 的`OrderPaidEto.UserRegionVersion`。
+5. 处理 m2 时，根据`OrderPaidEto.UserRegionVersion`，给对应的`LocalUserRegion`增加积分。
 
 我们解除了 m1 和 m2 的因果关系，从而实现了幂等。
 
@@ -153,7 +163,7 @@ public class LocalOrder : AggregateRoot<Guid>
 
 ## 方案总结
 
-笔者认为，解决事件乱序问题有以下原则。
+笔者认为，解决事件乱序问题有以下思路。
 
 1. 尽可能保持 DistributedEventHandler 的业务逻辑简单，以便发现潜在的乱序问题。
 2. 某些情况下，我们可以通过在本地记录实体的状态，将 handler 转化为幂等，就如上面场景 3 演示的那样。
