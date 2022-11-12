@@ -65,7 +65,7 @@ ABP Framework 5.0 实现了单体应用场景下，收件箱和发件箱的事�
 
   * t1 > t2 (乱序)：
 
-    [![s3-disordered](https://user-images.githubusercontent.com/30018771/201462126-ae30ed25-51a4-4af3-b1c3-926980991cfe.png)](https://excalidraw.com/#json=jaF6Ts9VKFZ6kZuLrylJ5,Aj9-Mgu9uTuvmj1ezb1ARQ)
+    [![s3-disordered](https://user-images.githubusercontent.com/30018771/201468155-e993fc08-b3b3-4dc4-8013-3970ea88107d.png)](https://excalidraw.com/#json=eqpZYwF74HGrnHeplZTuI,1xRbj2iYRJ5sueryX_JBIQ)
 
 积分服务在处理订单事件时，于本地冗余`LocalOrder`实体记录订单信息。
 
@@ -145,6 +145,35 @@ public class LocalOrder : AggregateRoot<Guid> // including an optimistic lock
 
 试着转换一下思路，如果为每位用户在每个 RegionVersion 单独建立实体记录积分，m1 与 m2 就不再是因果关系，顺序性的要求也就不存在了。
 
+### 场景 5：ABP 实体同步器
+
+在 ABP 的 DDD 实践中，不同模块之间会通过实体同步器冗余实体数据。一个典型的案例是 Blogging 模块的 BlogUserSynchronizer [[3]](#参考)。这实际上是前文场景 3 的一种衍生。不同之处在于，本场景中 m1 和 m2 是同种事件。
+
+* 事件 m1：用户 A 变更事件
+* 事件 m2：用户 A 变更事件
+* Handler 的工作：根据 m1/m2，更新`LocalUser`实体中的用户资料
+* 分析： m1 和 m2 顺序敏感，产生一致性问题
+  * t1 < t2 (正序)：
+
+    [![ordered](https://user-images.githubusercontent.com/30018771/194246857-ec06763c-f2be-4d39-85b2-b5243fb37a65.png)](https://excalidraw.com/#json=EzNloyRKYJa6rfvSNgm2l,HFAPhV9l9kZDT4SGJaZ-zA)
+
+  * t1 > t2 (乱序)：
+
+    [![s5-disordered](https://user-images.githubusercontent.com/30018771/201468277-40c792ce-9a9f-4b29-b46c-c4392b3b79bb.png)](https://excalidraw.com/#json=SwmSL9qcgrFZA5UV8HuPD,_LiJ20bKVHx8D7x5c-KfAw)
+
+
+我们给实体增加 int 类型的 `EntityVersion` 属性，此属性的值从 0 开始，并在每次更新实体时，自动递增 1。在实体同步器处理 `EntityUpdatedEto<UserEto>` 事件时，若 `UserEto.EntityVersion <= LocalUser.EntityVersion`，则跳过处理。就这样，我们解决了问题。我尝试了在 ABP 框架实现以上能力，见 PR #14197 [[4]](#参考)。
+
+#### 处理后
+
+  * t1 < t2 (正序)：
+
+    [![ordered](https://user-images.githubusercontent.com/30018771/194246857-ec06763c-f2be-4d39-85b2-b5243fb37a65.png)](https://excalidraw.com/#json=EzNloyRKYJa6rfvSNgm2l,HFAPhV9l9kZDT4SGJaZ-zA)
+
+  * t1 > t2 (乱序)：
+
+    [![s5-resolved](https://user-images.githubusercontent.com/30018771/201468757-793bc2bb-5d47-4c7d-bcff-32e705e24d1e.png)](https://excalidraw.com/#json=L0ZI13yl9EYwWtyQC6hwK,CcVzzXgnznQSGA7x8qLGng)
+
 ## 方案总结
 
 笔者认为，解决事件乱序问题有以下原则。
@@ -152,12 +181,7 @@ public class LocalOrder : AggregateRoot<Guid> // including an optimistic lock
 1. 尽可能保持 DistributedEventHandler 的业务逻辑简单，以便发现潜在的乱序问题。
 2. 如果因果关系来源于实体自身状态，可以通过实体状态检查，实现 handler 的幂等。参考上面场景 3 的做法。
 3. 如果因果关系来源于其他实体，可以尝试通过设计解除因果关系。如果无法解除因果关系，则手动实现幂等（这是不推荐的，因为会带来更大的复杂度）。参考上面场景 4 的做法。
-
-## ABP 实体同步器
-
-在 ABP 的 DDD 实践中，不同模块之间会通过实体同步器冗余实体数据。一个典型的案例是 Blogging 模块的 BlogUserSynchronizer [[3]](#参考)。这实际上是前文场景 3 的一种衍生。
-
-我们给实体增加 int 类型的 `EntityVersion` 属性，此属性的值从 0 开始，并在每次更新实体时，自动递增 1。在实体同步器处理 `EntityUpdatedEto<UserEto>` 事件时，若 `UserEto.EntityVersion <= BlogUser.EntityVersion`，则跳过处理。就这样，我们解决了问题。我尝试了在 ABP 框架实现以上能力，见 PR #14197 [[4]](#参考)。
+4. 实体同步器应采用 EntityVersion 的设计，以避免同步已过期的数据。
 
 ## 结论
 
