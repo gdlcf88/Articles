@@ -94,7 +94,7 @@ public class LocalOrder : AggregateRoot<Guid>
 
   * t1 > t2 (乱序)：
 
-    [![s3-resolved](https://user-images.githubusercontent.com/30018771/194258486-03390b1f-9b9e-4802-8099-db9a66d9c0b1.png)](https://excalidraw.com/#json=sgRxqhVcsJ_NfphSDKD2T,1XH7AKhZmSpTSXgjS1feKg)
+    [![s3-resolved](https://user-images.githubusercontent.com/30018771/201461615-f996a869-8e60-41bc-92ce-dafb1999e07d.png)](https://excalidraw.com/#json=fWKgQ6Zk9BMAthtsFMTJE,ybX2Txv7SZnc3qmxhl2ujg)
 
 ### 场景 4：m1 和 m2 有因果关系，m2 handler 不是幂等的，m1 和 m2 是不同实体产生的事件
 
