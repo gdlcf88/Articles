@@ -5,7 +5,7 @@ However, in a microservice or multi-database scenario,
 distributed events will no longer be linearizability [[1]](#references) due to the limitations of network latency and infrastructure efficiency.
 So there will inevitably be physical time disordering events.
 
-Borrowing an illustration from Daniel Wu's article "Messaging Reliability and Ordering" [[2]](#references) to show you the problem:
+Use an illustration from Daniel Wu's article "Messaging Reliability and Ordering" [[2]](#references) to show you the problem:
 
 ![image](https://user-images.githubusercontent.com/30018771/194262471-d5c7aa5f-adc6-4593-b0b2-9738ac56edab.png)
 
