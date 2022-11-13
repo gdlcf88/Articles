@@ -13,17 +13,17 @@ If the event being handled has a causality with any other event, there may be pr
 
 This article will discuss the situations and solutions we may encounter on the event subscriber apps based on the above truth.
 
-## Conventions
+## Cases
 
-1. We focus on a user score service, which is a subscriber to some distributed events.
+We make the following conventions.
+
+1. We focus on a user score service that subscribes to some distributed events.
 2. `m1` and `m2` are two events that occurred **successively**.
 3. `t1` and `t2` are when the service receives and handles the events m1 and m2, respectively.
 4. `t1 < t2` means that t1 is earlier than t2, which is called ordered; `t1 > t2` means that t1 is later than t2, which is called disordered.
 5. C (configuration) represents the state of the subscriber service. `C0` is the initial state, `CF` is the expected final state, and `CW` is the wrong final state.
 
-## Scenarios
-
-### Scenario 1: m1 and m2 are non-causal
+### Case 1: m1 and m2 are non-causal
 
 * Event m1: event of user A created
 * Event m2: event of user B created
@@ -39,37 +39,48 @@ This article will discuss the situations and solutions we may encounter on the e
 
 We don't need to intervene in it.
 
-### Scenario 2: m1 and m2 are causal, m2 handler is idempotent
+### Case 2
 
 * Event m1: event of user A created
 * Event m2: event of order 1 paid
 * Handler jobs: According to m1, create a `LocalUser` entity locally; according to m2, increase `LocalUser.Score`
-* Analysis: m1 and m2 are ordering insensitive, but the disordering is intercepted by the business code, which avoids the consistency problem
+* Analysis: m1 and m2 are causal; m1 and m2 are ordering sensitive, but the "entity not found exception" intercepts the disordering, so handlers are idempotent, which avoids the consistency problem
   * t1 < t2 (ordered):
 
     [![ordered](https://user-images.githubusercontent.com/30018771/194246857-ec06763c-f2be-4d39-85b2-b5243fb37a65.png)](https://excalidraw.com/#json=EzNloyRKYJa6rfvSNgm2l,HFAPhV9l9kZDT4SGJaZ-zA)
 
   * t1 > t2 (disordered):
 
-    [![s2-disordered](https://user-images.githubusercontent.com/30018771/194253204-da17cf54-8b6a-410e-89f7-ed01d6a7fd0a.png)](https://excalidraw.com/#json=4DC1glLm6_BfbYG8n5Z1i,laJPAVucCQX9cq7f79FoHg)
+    [![s2-disordered](https://user-images.githubusercontent.com/30018771/201462287-6155f1b9-dd9f-4452-bb3d-921b2e1b876b.png)](https://excalidraw.com/#json=6azro2d7yq3YVGqmmFkeE,vX5ZLgF_as_otPyRgZX0Yg)
 
-We don't need to intervene in it. After m1 is handled, m2 delays in retrying handling, essentially reaching the ordered.
+We don't need to intervene in it. After m1 is handled, m2 delays retry handling, essentially reaching the order.
 
-### Scenario 3: m1 and m2 are causal, m2 handler is not idempotent, m1 and m2 are events from the same entity
+### Case 3
 
 * Event m1: event of order 1 paid
 * Event m2: event of order 1 canceled
-* Handler jobs: According to m1, increase `LocalUser.Score`; according to m2, deduct `LocalUser.Score` if the order has been paid
-* Analysis: m1 and m2 are ordering insensitive, resulting in the consistency problem
+* Handler jobs: According to m1, increase `LocalUser.Score`; according to m2, deduct `LocalUser.Score`; The score is minimum deducted to 0 and will not be a negative number
+* Analysis: m1 and m2 are causal; m1 and m2 are ordering sensitive, and handlers are not idempotent, so there will be a consistency problem
   * t1 < t2 (ordered):
 
     [![ordered](https://user-images.githubusercontent.com/30018771/194246857-ec06763c-f2be-4d39-85b2-b5243fb37a65.png)](https://excalidraw.com/#json=EzNloyRKYJa6rfvSNgm2l,HFAPhV9l9kZDT4SGJaZ-zA)
 
   * t1 > t2 (disordered):
 
-    [![s3-s4-disordered](https://user-images.githubusercontent.com/30018771/194257491-ff439083-5a18-4afa-b815-a2853a4b5e97.png)](https://excalidraw.com/#json=83yIcQyZr9Nn8QCewL9LK,CeEjjo-knZoUuSkYbjG0BA)
+    [![s3-disordered](https://user-images.githubusercontent.com/30018771/201470772-4a01a4fe-f933-4d2c-82cf-e59fd2905bec.png)](https://excalidraw.com/#json=1wnVTL1RZWpvXu3YkHpj8,uFffnJLeWEMTLk3U33Z2ZA)
 
-We can make m1 and m2 carry the entity data, at least include the `PaidTime` and `CancellationTime`, to judge the actual state of the order and make correct handling, which essentially reordered the events.
+The user score service creates `LocalOrder` entities to record the order handling states.
+
+```CSharp
+public class LocalOrder : AggregateRoot<Guid>
+{
+    public bool HasPaidEventHandled { get; set; } // set to true after handling m1
+}
+```
+
+If the m2 handler finds `OrderCanceledEto.OrderPaidTime != null` but `LocalOrder.HasPaidEventHandled == false`, it throws an exception. After m1 is handled, m2 delays retry handling, essentially reaching the order.
+
+We essentially transformed Case 3 into Case 2, thus achieving idempotency.
 
 #### After the Change
 
@@ -79,28 +90,40 @@ We can make m1 and m2 carry the entity data, at least include the `PaidTime` and
 
   * t1 > t2 (disordered):
 
-    [![s3-resolved](https://user-images.githubusercontent.com/30018771/194258486-03390b1f-9b9e-4802-8099-db9a66d9c0b1.png)](https://excalidraw.com/#json=sgRxqhVcsJ_NfphSDKD2T,1XH7AKhZmSpTSXgjS1feKg)
+    [![s3-resolved](https://user-images.githubusercontent.com/30018771/201462287-6155f1b9-dd9f-4452-bb3d-921b2e1b876b.png)](https://excalidraw.com/#json=6azro2d7yq3YVGqmmFkeE,vX5ZLgF_as_otPyRgZX0Yg)
 
-### Scenario 4: m1 and m2 are causal, m2 handler is not idempotent, m1 and m2 are events from different entities
+### Case 4
 
 * Event m1: event of user A updated (`Region` changed)
 * Event m2: event of order 1 paid
 * Handler jobs: According to m1, clear `LocalUser.Score` if `UserEto.Region != LocalUser.Region`. According to m2, increase `LocalUser.Score`
-* Analysis: m1 and m2 are ordering insensitive, resulting in the consistency problem
+* Analysis: m1 and m2 are causal; m1 and m2 are ordering sensitive, and handlers are not idempotent, so there will be a consistency problem
   * t1 < t2 (ordered):
 
     [![ordered](https://user-images.githubusercontent.com/30018771/194246857-ec06763c-f2be-4d39-85b2-b5243fb37a65.png)](https://excalidraw.com/#json=EzNloyRKYJa6rfvSNgm2l,HFAPhV9l9kZDT4SGJaZ-zA)
 
   * t1 > t2 (disordered):
 
-    [![s3-s4-disordered](https://user-images.githubusercontent.com/30018771/194257491-ff439083-5a18-4afa-b815-a2853a4b5e97.png)](https://excalidraw.com/#json=83yIcQyZr9Nn8QCewL9LK,CeEjjo-knZoUuSkYbjG0BA)
+    [![s4-disordered](https://user-images.githubusercontent.com/30018771/201470772-4a01a4fe-f933-4d2c-82cf-e59fd2905bec.png)](https://excalidraw.com/#json=1wnVTL1RZWpvXu3YkHpj8,uFffnJLeWEMTLk3U33Z2ZA)
 
 We can solve the problem with these changes:
-  1. Add a new `RegionVersion` property in the `User` entity with the default value of 0. It increases by 1 once the user's region is changed.
-  2. When the user pays, the local service invokes the Identity remote service to query, write the found `UserDto.RegionVersion` into `OrderPaidEto.UserRegionVersion`, and publishes it together with the event m2.
-  3. When handling m1, `UserEto.RegionVersion` should be synced to `LocalUser.RegionVersion`.
-  4. When handling m2, discard the event and end handling if `OrderPaidEto.RegionVersion < LocalUser.RegionVersion`. It is because changing the region will clear the scores, and the scores obtained from the old region should be discarded and not added to the scores of the new region.
-  5. When handling m2, invokes the Identity remote service to query whether `UserDto.RegionVersion == LocalUser.RegionVersion`. If so, the handler should increase the user's scores. Otherwise, it throws an exception and tries next time. It is to ensure that the synchronization of the RegionVersion (including clearing the user's existing scores) is done.
+
+1. Add a new `RegionVersion` property in the `User` entity with the default value of 0. It increases by 1 once the user's region is changed.
+2. The user score service uses `LocalUserRegion.Score` to record user scores instead of `LocalUser.Score`.
+    ```CSharp
+    public class LocalUserRegion : AggregateRoot<Guid>
+    {
+        public Guid UserId { get; set; }
+        public string Region { get; set; }
+        public int RegionVersion { get; set; }
+        public int Score { get; set; }
+    }
+    ```
+3. When handling m1, if `UserEto.RegionVersion` is new, create an extra `LocalUserRegion` entity with the initial score of 0, which equals clearing the user's scores once his region is changed.
+4. When the user pays, the local service invokes the Identity remote service to query and sets the found `UserDto.RegionVersion` as `OrderPaidEto.UserRegionVersion` in the event m2.
+5. When handling m2, according to m1, increase the corresponding `LocalUserRegion.Score`.
+
+We made the handlers idempotent by disentangling the causality of m1 and m2.
 
 #### After the Change
 
@@ -108,37 +131,52 @@ We can solve the problem with these changes:
 
     [![ordered](https://user-images.githubusercontent.com/30018771/194246857-ec06763c-f2be-4d39-85b2-b5243fb37a65.png)](https://excalidraw.com/#json=EzNloyRKYJa6rfvSNgm2l,HFAPhV9l9kZDT4SGJaZ-zA)
 
-  * t1 > t2 (disordered) and RegionVersion is not stale:
+  * t1 > t2 (disordered):
 
-    [![s4-resolved-1](https://user-images.githubusercontent.com/30018771/194259901-bc57228c-f307-4b7c-9753-56b34b2a5b2b.png)](https://excalidraw.com/#json=y_PkS5DOUfJudbS8jE1h-,VVFmDfNuw4CuyOirCG54FA)
+    [![s4-resolved](https://user-images.githubusercontent.com/30018771/201462287-6155f1b9-dd9f-4452-bb3d-921b2e1b876b.png)](https://excalidraw.com/#json=6azro2d7yq3YVGqmmFkeE,vX5ZLgF_as_otPyRgZX0Yg)
 
-  * t1 > t2 (disordered) and RegionVersion is stale:
+### Case 5: ABP Entity Synchronizer
 
-    [![s4-resolved-2](https://user-images.githubusercontent.com/30018771/194261319-1785b143-6d41-4f38-b984-d0c4f6d9708e.png)](https://excalidraw.com/#json=74D7htXoXKvDzMXQgJ6aH,6cL_fOdAfwvyHMVqL-21YQ)
+In the DDD practice of the ABP framework, modules use entity synchronizers to redundant data of external entities. A typical case is the BlogUserSynchronizer [[3]](#references) of the Blogging module. What's unique about this case is that stale events can be skipped handling if not strictly required.
 
-#### A Better Way
+* Event m1: event of User A updated
+* Event m2: event of User A updated
+* Handler jobs: According to m1 and m2, update the user information in the `LocalUser` entity.
+* Analysis: Once m2 is handled earlier than m1, the stale data will overwrite the latest data, so there will be a consistency problem
+  * t1 < t2 (ordered):
 
-Think different. What if we create an entity for each RegionVersion of each user? Then the m1 and m2 are no more causal, so the ordering requirement is also gone.
+    [![ordered](https://user-images.githubusercontent.com/30018771/194246857-ec06763c-f2be-4d39-85b2-b5243fb37a65.png)](https://excalidraw.com/#json=EzNloyRKYJa6rfvSNgm2l,HFAPhV9l9kZDT4SGJaZ-zA)
+
+  * t1 > t2 (disordered):
+
+    [![s5-disordered](https://user-images.githubusercontent.com/30018771/201468277-40c792ce-9a9f-4b29-b46c-c4392b3b79bb.png)](https://excalidraw.com/#json=SwmSL9qcgrFZA5UV8HuPD,_LiJ20bKVHx8D7x5c-KfAw)
+
+Let's add a new integer property named `EntityVersion`. Its default value is 0 and increments by one every time the entity changes. When the entity synchronizer gets an `EntityUpdatedEto<UserEto>` event, skip handling if `UserEto.EntityVersion <= LocalUser.EntityVersion` is satisfied. That's it, and we solved the problem. I tried implementing the above feature in the ABP framework. See PR #14197 [[4]](#references).
+
+#### After the Change
+
+  * t1 < t2 (ordered):
+
+    [![ordered](https://user-images.githubusercontent.com/30018771/194246857-ec06763c-f2be-4d39-85b2-b5243fb37a65.png)](https://excalidraw.com/#json=EzNloyRKYJa6rfvSNgm2l,HFAPhV9l9kZDT4SGJaZ-zA)
+
+  * t1 > t2 (disordered):
+
+    [![s5-resolved](https://user-images.githubusercontent.com/30018771/201468757-793bc2bb-5d47-4c7d-bcff-32e705e24d1e.png)](https://excalidraw.com/#json=L0ZI13yl9EYwWtyQC6hwK,CcVzzXgnznQSGA7x8qLGng)
 
 ## Solution Summary
 
-We believe that there are the following principles for solving event disordering.
+We believe that there are the following ideas for solving event disordering.
 
 1. Try to keep the business logic of the DistributedEventHandler simple to spot potential event disordering problems.
-2. If the causality is from the entity's own state, we can check the entity state to realize the idempotency of the event handler. Refer to Scenario 3 above.
-3. If the causality is from other entities, we can try to dissolve the causality by design. If we fail, implement idempotency manually (this is not recommended since it brings complexity). Refer to Scenario 4 above.
-
-## ABP Entity Synchronizer
-
-In the DDD practice of the ABP framework, modules use entity synchronizers to redundant data of external entities. A typical case is the BlogUserSynchronizer [[3]](#references) of the Blogging module. It is derived from Scenario 3 above.
-
-Let's add a new integer property named `EntityVersion`. Its default value is 0 and increments by one every time the entity changes. When the entity synchronizer gets an `EntityUpdatedEto<UserEto>` event, skip handling if `UserEto.EntityVersion <= BlogUser.EntityVersion` is satisfied. That's it, and we solved the problem. I tried implementing the above feature in the ABP framework. See PR #14197 [[4]](#references).
+2. In some cases, we can make handlers idempotent by recording the entity's states locally, as Case 3 did above.
+3. In some cases, we can disentangle causality by improving the business design, as Case 4 did above.
+4. Entity synchronizers can be designed with EntityVersion to avoid synchronizing to stale data.
 
 ## Conclusion
 
 Even if your app is currently monolithic, you should be concerned about the event disordering. That is a preparation for possible architectural changes in the future. Also, please give up implementing linearizability, as it is impossible in microservices or multi-database scenarios.
 
-In several scenarios mentioned in this article, it seems that it is not difficult for developers to find the hidden dangers of consistency problems. However, the business is more complex in actual production, and the diverse events will be hard-considered. Even if we find out all possible causalities and deal with them during development, can we ensure that nothing will go wrong when the business changes? The answer is probably no.
+In several cases mentioned in this article, it seems that it is not difficult for developers to find the hidden dangers of consistency problems. However, the business is more complex in actual production, and the diverse events will be hard-considered. Even if we find out all possible causalities and deal with them during development, can we ensure that nothing will go wrong when the business changes? The answer is probably no.
 
 There is no silver bullet to the distributed consistency problem. It's always there. Developers can only reduce complexity, dissolve the causality or manually implement idempotency.
 

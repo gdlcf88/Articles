@@ -13,7 +13,7 @@ ABP Framework 5.0 实现了单体应用场景下，收件箱和发件箱的事�
 
 ## 案例
 
-作如下假设
+我们做以下假设。
 
 1. 我们关注的是一个用户积分服务，它是一些分布式事件的订阅方。
 2. `m1` 和 `m2` 是 **先后发生** 的两个事件。
@@ -42,7 +42,7 @@ ABP Framework 5.0 实现了单体应用场景下，收件箱和发件箱的事�
 * 事件 m1：用户 A 创建事件
 * 事件 m2：订单 1 支付事件
 * Handler 的工作：根据 m1，在本地创建`LocalUser`实体；根据 m2，给`LocalUser.Score`增加积分
-* 分析：m1 和 m2 有因果关系，但 handler 是幂等的。m1 和 m2 顺序敏感，但业务上拦截了乱序，不产生一致性问题
+* 分析：m1 和 m2 有因果关系。m1 和 m2 顺序敏感，但“实体不存在”的异常拦截了乱序，handler 是幂等的，不存在一致性问题
   * t1 < t2 (正序)：
 
     [![ordered](https://user-images.githubusercontent.com/30018771/194246857-ec06763c-f2be-4d39-85b2-b5243fb37a65.png)](https://excalidraw.com/#json=EzNloyRKYJa6rfvSNgm2l,HFAPhV9l9kZDT4SGJaZ-zA)
@@ -57,8 +57,8 @@ ABP Framework 5.0 实现了单体应用场景下，收件箱和发件箱的事�
 
 * 事件 m1：订单 1 支付事件
 * 事件 m2：订单 1 取消事件
-* Handler 的工作：根据 m1，给`LocalUser.Score`增加积分；根据 m2，给`LocalUser.Score`扣减积分，积分最低扣到 0，不会为负数
-* 分析： m1 和 m2 有因果关系，handler 不是幂等的。m1 和 m2 顺序敏感，产生一致性问题
+* Handler 的工作：根据 m1，给`LocalUser.Score`增加积分；根据 m2，给`LocalUser.Score`扣减积分；积分最低扣到 0，不会为负数
+* 分析： m1 和 m2 有因果关系。m1 和 m2 顺序敏感，handler 不是幂等的，存在一致性问题
   * t1 < t2 (正序)：
 
     [![ordered](https://user-images.githubusercontent.com/30018771/194246857-ec06763c-f2be-4d39-85b2-b5243fb37a65.png)](https://excalidraw.com/#json=EzNloyRKYJa6rfvSNgm2l,HFAPhV9l9kZDT4SGJaZ-zA)
@@ -95,7 +95,7 @@ public class LocalOrder : AggregateRoot<Guid>
 * 事件 m1：用户 A 变更事件 (变更了可用区 `Region`)
 * 事件 m2：订单 1 支付事件
 * Handler 的工作：根据 m1，由于`UserEto.Region != LocalUser.Region`，清零`LocalUser.Score`。根据 m2，给`LocalUser.Score`增加积分
-* 分析：m1 和 m2 有因果关系，handler 不是幂等的。m1 和 m2 顺序敏感，产生一致性问题
+* 分析：m1 和 m2 有因果关系。m1 和 m2 顺序敏感，handler 不是幂等的，存在一致性问题
   * t1 < t2 (正序)：
 
     [![ordered](https://user-images.githubusercontent.com/30018771/194246857-ec06763c-f2be-4d39-85b2-b5243fb37a65.png)](https://excalidraw.com/#json=EzNloyRKYJa6rfvSNgm2l,HFAPhV9l9kZDT4SGJaZ-zA)
@@ -119,7 +119,7 @@ public class LocalOrder : AggregateRoot<Guid>
     ```
 3. 处理 m1 时，若`UserEto.RegionVersion`更新，则创建新的`LocalUserRegion`实体，初始的积分为 0，相当于变更 Region 即清零积分。
 4. 在用户支付时，本地服务调用 Identity 远程服务，将查得的`UserDto.RegionVersion`写入事件 m2 的`OrderPaidEto.UserRegionVersion`。
-5. 处理 m2 时，根据`OrderPaidEto.UserRegionVersion`，给对应的`LocalUserRegion`增加积分。
+5. 处理 m2 时，根据`OrderPaidEto.UserRegionVersion`，增加对应的`LocalUserRegion.Score`。
 
 我们解除了 m1 和 m2 的因果关系，从而实现了幂等。
 
@@ -140,7 +140,7 @@ public class LocalOrder : AggregateRoot<Guid>
 * 事件 m1：用户 A 变更事件
 * 事件 m2：用户 A 变更事件
 * Handler 的工作：根据 m1/m2，更新`LocalUser`实体中的用户资料
-* 分析：一旦 m2 早于 m1 被处理，则旧资料会覆盖新资料，产生一致性问题
+* 分析：一旦 m2 早于 m1 被处理，则旧资料会覆盖新资料，存在一致性问题
   * t1 < t2 (正序)：
 
     [![ordered](https://user-images.githubusercontent.com/30018771/194246857-ec06763c-f2be-4d39-85b2-b5243fb37a65.png)](https://excalidraw.com/#json=EzNloyRKYJa6rfvSNgm2l,HFAPhV9l9kZDT4SGJaZ-zA)
