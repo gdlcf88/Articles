@@ -119,7 +119,7 @@ We can solve the problem with these changes:
         public int Score { get; set; }
     }
     ```
-3. When handling m1, if `UserEto.RegionVersion` is new, create an extra `LocalUserRegion` entity with the initial score of 0, which equals clearing the user's scores once his region is changed.
+3. When handling m1, if `UserEto.RegionVersion` is new, create an new `LocalUserRegion` entity with the initial score of 0, which equals clearing the user's scores once his region is changed.
 4. When the user pays, the local service invokes the Identity remote service to query and sets the found `UserDto.RegionVersion` as `OrderPaidEto.UserRegionVersion` in the event m2.
 5. When handling m2, according to m1, increase the corresponding `LocalUserRegion.Score`.
 
