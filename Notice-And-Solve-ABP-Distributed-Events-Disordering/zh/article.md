@@ -11,15 +11,15 @@ ABP Framework 5.0 实现了单体应用场景下，收件箱和发件箱的事�
 
 本文在这个事实下，讨论我们在订阅方可能遇到的情况和解决方案。
 
-## 假设
+## 案例
+
+作如下假设
 
 1. 我们关注的是一个用户积分服务，它是一些分布式事件的订阅方。
 2. `m1` 和 `m2` 是 **先后发生** 的两个事件。
 3. `t1` 和 `t2` 分别为订阅方服务收到并处理事件 m1 和 m2 的时间。
 4. `t1 < t2` 代表 t1 早于 t2，称为正序；`t1 > t2` 代表 t1 晚于 t2，称为乱序。
 5. C 代表订阅方服务的状态(Configuration)。`C0` 为初始状态，`CF` 为预期的最终状态，`CW` 为错误的最终状态。
-
-## 案例
 
 ### 案例 1
 
@@ -161,7 +161,7 @@ public class LocalOrder : AggregateRoot<Guid>
 
     [![s5-resolved](https://user-images.githubusercontent.com/30018771/201468757-793bc2bb-5d47-4c7d-bcff-32e705e24d1e.png)](https://excalidraw.com/#json=L0ZI13yl9EYwWtyQC6hwK,CcVzzXgnznQSGA7x8qLGng)
 
-## 方案总结
+## 思路整理
 
 笔者认为，解决事件乱序问题有以下思路。
 
