@@ -23,12 +23,12 @@ We make the following conventions.
 4. `t1 < t2` means that t1 is earlier than t2, which is called ordered; `t1 > t2` means that t1 is later than t2, which is called disordered.
 5. C (configuration) represents the state of the subscriber service. `C0` is the initial state, `CF` is the expected final state, and `CW` is the wrong final state.
 
-### Case 1: m1 and m2 are non-causal
+### Case 1
 
 * Event m1: event of user A created
 * Event m2: event of user B created
 * Handler jobs: Create LocalUser entities locally according to m1 and m2, respectively
-* Analysis: m1 and m2 are ordering insensitive
+* Analysis: m1 and m2 are non-causal and ordering insensitive
   * t1 < t2 (ordered):
 
     [![ordered](https://user-images.githubusercontent.com/30018771/194246857-ec06763c-f2be-4d39-85b2-b5243fb37a65.png)](https://excalidraw.com/#json=EzNloyRKYJa6rfvSNgm2l,HFAPhV9l9kZDT4SGJaZ-zA)
