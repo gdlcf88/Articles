@@ -18,7 +18,7 @@
 |          更少的数据传输          |         :x:          |             :heavy_check_mark:             |
 |  保证事件发出<br>(事务工作单元)  |  :heavy_check_mark:  |             :heavy_check_mark:             |
 | 保证事件发出<br>(非事务工作单元) |         :x:          | :heavy_check_mark:<br>(要求消费端解决幂等) |
-|       不要求消费端解决幂等       |  :heavy_check_mark:  |             :heavy_check_mark:             |
+|    避免重复处理(仅限纯DB操作)    |  :heavy_check_mark:  |             :heavy_check_mark:             |
 |        支持多租户多数据库        |  :heavy_check_mark:  |                    :x:                     |
 |         没有增加外部设施         |         :x:          |             :heavy_check_mark:             |
 |          管理面板和报警          |  :heavy_check_mark:  |                    :x:                     |
